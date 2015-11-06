@@ -52,7 +52,7 @@ public abstract class FredHardware extends OpMode {
 		 */
 
         try {
-            motorLeft = hardwareMap.dcMotor.get("motor_1");
+            motorLeft = hardwareMap.dcMotor.get("motorLeft");
             if (motorLeft == null) {
                 hardwareErrors.put("error motorLeft", "not found");
             }
@@ -62,7 +62,7 @@ public abstract class FredHardware extends OpMode {
         }
 
         try {
-            motorRight = hardwareMap.dcMotor.get("motor_2");
+            motorRight = hardwareMap.dcMotor.get("motorRight");
             if (motorRight == null) {
                 hardwareErrors.put("error motorRight", "not found");
             } else {
@@ -73,7 +73,8 @@ public abstract class FredHardware extends OpMode {
         }
 
         try {
-            colorSensor = hardwareMap.colorSensor.get("colorSensor");
+            // sensor 5
+            colorSensor = hardwareMap.colorSensor.get("color sensor");
             if (colorSensor == null) {
                 hardwareErrors.put("error colorSensor", "not found");
             }
@@ -83,7 +84,8 @@ public abstract class FredHardware extends OpMode {
         }
 
         try {
-            lightSensor = hardwareMap.lightSensor.get("lightSensor");
+            // sensor 4
+            lightSensor = hardwareMap.lightSensor.get("light sensor");
             if (lightSensor == null) {
                 hardwareErrors.put("error lightSensor", "not found");
             }
@@ -93,6 +95,7 @@ public abstract class FredHardware extends OpMode {
         }
 
         try {
+            // servo 1
             armServo = hardwareMap.servo.get("arm servo");
             armServo.setDirection(Servo.Direction.FORWARD);
             if (armServo == null) {
@@ -104,6 +107,7 @@ public abstract class FredHardware extends OpMode {
         }
 
         try {
+            // servo 2
             bucketServo = hardwareMap.servo.get("bucket servo");
             bucketServo.setDirection(Servo.Direction.FORWARD);
             if (bucketServo == null) {
