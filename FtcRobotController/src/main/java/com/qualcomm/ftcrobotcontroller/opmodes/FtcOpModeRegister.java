@@ -34,6 +34,9 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegister;
 
+import org.usfirst.ftc8723.FredAuto;
+import org.usfirst.ftc8723.FredTeleOp;
+
 /**
  * Register Op Modes
  */
@@ -54,6 +57,10 @@ public class FtcOpModeRegister implements OpModeRegister {
      *
      * If two or more op modes are registered with the same name, the app will display an error.
      */
+
+    manager.register("FredTeleOp", FredTeleOp.class);
+    manager.register("FredAuto", FredAuto.class);
+
 
     manager.register("NullOp", NullOp.class);
 
