@@ -22,7 +22,7 @@ public abstract class FredHardware extends OpMode {
     // position of the servos.
     double armPosition, bucketPosition;
 
-    // power to the wheels
+    // intended power to the wheels
     float rPower, lPower;
 
     // hardware
@@ -97,9 +97,10 @@ public abstract class FredHardware extends OpMode {
         try {
             // servo 1
             armServo = hardwareMap.servo.get("arm servo");
-            armServo.setDirection(Servo.Direction.FORWARD);
             if (armServo == null) {
                 hardwareErrors.put("error armServo", "not found");
+            } else {
+                armServo.setDirection(Servo.Direction.FORWARD);
             }
 
         } catch (Exception e) {
@@ -109,24 +110,29 @@ public abstract class FredHardware extends OpMode {
         try {
             // servo 2
             bucketServo = hardwareMap.servo.get("bucket servo");
-            bucketServo.setDirection(Servo.Direction.FORWARD);
             if (bucketServo == null) {
                 hardwareErrors.put("error bucketServo", "not found");
+            } else {
+                bucketServo.setDirection(Servo.Direction.FORWARD);
             }
 
         } catch (Exception e) {
             hardwareErrors.put("error bucketServo", e.getMessage());
         }
 
-        if (hardwareErrors.isEmpty()) hardwareErrors.put("errors", "none");
-
         // try this
         // DcMotorController motorController = hardwareMap.dcMotorController.get("motorController");
         // motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
     }
 
+    /**
+     * FredAuto and FredTeleOp should override this to do the normal loop functions
+     */
+    public abstract void innerLoop();
+
     @Override
     public void loop() {
+        // perform the normal loop functions inside a try/catch to improve error handling
         try {
             innerLoop();
 
@@ -152,6 +158,7 @@ public abstract class FredHardware extends OpMode {
             telemetry.addData("loopError", e.getClass().getSimpleName() + " - " + message);
         }
 
+        // todo - we may not need to do this every time... check to see if we add telemetry directly in init
         for (Iterator<String> it = hardwareErrors.keySet().iterator(); it.hasNext(); ) {
             String key = it.next();
             String error = hardwareErrors.get(key);
@@ -160,8 +167,6 @@ public abstract class FredHardware extends OpMode {
 
     }
 
-    public abstract void innerLoop();
-
     /**
      * Reset the left drive wheel encoder.
      */
@@ -169,12 +174,10 @@ public abstract class FredHardware extends OpMode {
 
     {
         if (motorLeft != null) {
-            motorLeft.setChannelMode
-                    (DcMotorController.RunMode.RESET_ENCODERS
-                    );
+            motorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
 
-    } // reset_left_drive_encoder
+    }
 
     /**
      * Reset the right drive wheel encoder.
@@ -183,12 +186,10 @@ public abstract class FredHardware extends OpMode {
 
     {
         if (motorRight != null) {
-            motorRight.setChannelMode
-                    (DcMotorController.RunMode.RESET_ENCODERS
-                    );
+            motorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
 
-    } // reset_right_drive_encoder
+    }
 
     /**
      * Reset both drive wheel encoders.
@@ -202,12 +203,12 @@ public abstract class FredHardware extends OpMode {
         reset_left_drive_encoder();
         reset_right_drive_encoder();
 
-    } // reset_drive_encoders
+    }
 
     public void run_using_left_drive_encoder()
     {
         if (motorLeft != null) {
-            motorLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+            motorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         }
 
     }
@@ -218,7 +219,7 @@ public abstract class FredHardware extends OpMode {
     public void run_using_right_drive_encoder()
     {
         if (motorRight != null) {
-            motorRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+            motorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         }
 
     }
@@ -229,13 +230,11 @@ public abstract class FredHardware extends OpMode {
     public void run_using_encoders()
 
     {
-        //
-        // Call other members to perform the action on both motors.
-        //
+        // perform the action on both motors.
         run_using_left_drive_encoder();
         run_using_right_drive_encoder();
 
-    } // run_using_encoders
+    }
 
     /**
      * Scale the joystick input using a nonlinear algorithm.
@@ -253,47 +252,12 @@ public abstract class FredHardware extends OpMode {
     } // set_drive_power
 
     /**
-     * Indicate whether the left drive motor's encoder has reached a value.
-     */
-    boolean has_left_drive_encoder_reached(double p_count)
-
-    {
-        //
-        // Assume failure.
-        //
-        boolean l_return = false;
-
-        if (motorLeft != null) {
-            //
-            // Has the encoder reached the specified values?
-            //
-            // TODO Implement stall code using these variables.
-            //
-            if (Math.abs(motorLeft.getCurrentPosition()) > p_count) {
-                //
-                // Set the status to a positive indication.
-                //
-                l_return = true;
-            }
-        }
-
-        //
-        // Return the status.
-        //
-        return l_return;
-
-    } // has_left_drive_encoder_reached
-
-    /**
      * Indicate whether the right drive motor's encoder has reached a value.
      */
     boolean has_right_drive_encoder_reached(double p_count)
 
     {
-        //
-        // Assume failure.
-        //
-        boolean l_return = false;
+        boolean success = false;
 
         if (motorRight != null) {
             //
@@ -302,154 +266,113 @@ public abstract class FredHardware extends OpMode {
             // TODO Implement stall code using these variables.
             //
             if (Math.abs(motorRight.getCurrentPosition()) > p_count) {
-                //
-                // Set the status to a positive indication.
-                //
-                l_return = true;
+                success = true;
             }
         }
 
-        //
-        // Return the status.
-        //
-        return l_return;
+        return success;
 
-    } // has_right_drive_encoder_reached
+    }
+
+    /**
+     * Indicate whether the left drive motor's encoder has reached a value.
+     */
+    boolean has_left_drive_encoder_reached(double p_count)
+
+    {
+        boolean success = false;
+
+        if (motorLeft != null) {
+            //
+            // Has the encoder reached the specified values?
+            //
+            // TODO Implement stall code using these variables.
+            //
+            if (Math.abs(motorLeft.getCurrentPosition()) > p_count) {
+                success = true;
+            }
+        }
+
+        return success;
+
+    }
 
     /**
      * Access the left encoder's count.
      */
-    int a_left_encoder_count() {
-        int l_return = 0;
+    int leftEncoder() {
+        int value = 0;
 
         if (motorLeft != null) {
-            l_return = motorLeft.getCurrentPosition();
+            value = motorLeft.getCurrentPosition();
         }
 
-        return l_return;
+        return value;
 
-    } // a_left_encoder_count
+    }
 
     /**
      * Access the right encoder's count.
      */
-    int a_right_encoder_count()
+    int rightEncoder()
 
     {
-        int l_return = 0;
+        int value = 0;
 
         if (motorRight != null) {
-            l_return = motorRight.getCurrentPosition();
+            value = motorRight.getCurrentPosition();
         }
 
-        return l_return;
+        return value;
 
-    } // a_right_encoder_count
+    }
 
     /**
      * Indicate whether the drive motors' encoders have reached a value.
      */
-    boolean have_drive_encoders_reached(double p_left_count, double p_right_count) {
-        //
-        // Assume failure.
-        //
-        boolean l_return = false;
+    boolean have_drive_encoders_reached(double leftCount, double rightCount) {
 
-        //
-        // Have the encoders reached the specified values?
-        //
-        if (has_left_drive_encoder_reached(p_left_count) &&
-                has_right_drive_encoder_reached(p_right_count)) {
-            //
-            // Set the status to a positive indication.
-            //
-            l_return = true;
-        }
+        return has_left_drive_encoder_reached(leftCount) && has_right_drive_encoder_reached(rightCount);
 
-        //
-        // Return the status.
-        //
-        return l_return;
-
-    } // have_encoders_reached
+    }
 
     /**
      * Indicate whether the left drive encoder has been completely reset.
      */
     boolean has_left_drive_encoder_reset() {
-        //
-        // Assume failure.
-        //
-        boolean l_return = false;
+        boolean success = false; // assume failure
 
-        //
         // Has the left encoder reached zero?
-        //
-        if (a_left_encoder_count() == 0) {
-            //
-            // Set the status to a positive indication.
-            //
-            l_return = true;
+        if (leftEncoder() == 0) {
+            success = true;
         }
 
-        //
-        // Return the status.
-        //
-        return l_return;
+        return success;
 
-    } // has_left_drive_encoder_reset
+    }
 
     /**
      * Indicate whether the left drive encoder has been completely reset.
      */
     boolean has_right_drive_encoder_reset() {
-        //
-        // Assume failure.
-        //
-        boolean l_return = false;
+        boolean success = false;  // Assume failure
 
-        //
         // Has the right encoder reached zero?
-        //
-        if (a_right_encoder_count() == 0) {
-            //
-            // Set the status to a positive indication.
-            //
-            l_return = true;
+        if (rightEncoder() == 0) {
+            success = true;
         }
 
-        //
-        // Return the status.
-        //
-        return l_return;
+        return success;
 
-    } // has_right_drive_encoder_reset
+    }
 
     /**
      * Indicate whether the encoders have been completely reset.
      */
     boolean have_drive_encoders_reset() {
-        //
-        // Assume failure.
-        //
-        boolean l_return = false;
+        return has_left_drive_encoder_reset() && has_right_drive_encoder_reset();
 
-        //
-        // Have the encoders reached zero?
-        //
-        if (has_left_drive_encoder_reset() && has_right_drive_encoder_reset()) {
-            //
-            // Set the status to a positive indication.
-            //
-            l_return = true;
-        }
-
-        //
-        // Return the status.
-        //
-        return l_return;
-
-    } // have_drive_encoders_reset
+    }
 
     final static double ARM_MIN_RANGE = 0.20;
     final static double ARM_MAX_RANGE = 0.90;
