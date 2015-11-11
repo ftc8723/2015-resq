@@ -37,96 +37,48 @@ public class FredAuto extends FredHardware {
 			// Synchronize the state machine and hardware.
 			//
 			case 0:
-				//
-				// Reset the encoders to ensure they are at a known good value.
-				//
 				reset_drive_encoders ();
-
-				//
-				// Transition to the next state when this method is called again.
-				//
-				step=7; // should be step++;
+				step++;
 
 				break;
-			//
-			// Drive forward until the encoders exceed the specified values.
-			//
 			case 1:
-				//
-				// Tell the system that motor encoders will be used.  This call MUST
-				// be in this state and NOT the previous or the encoders will not
-				// work.  It doesn't need to be in subsequent states.
-				//
 				run_using_encoders ();
 
-				//
-				// Start the drive wheel motors at full power.
-				//
 				set_drive_power (1.0f, 1.0f);
 
-				//
-				// Have the motor shafts turned the required amount?
-				//
-				// If they haven't, then the op-mode remains in this state (i.e this
-				// block will be executed the next time this method is called).
-				//
-				if (have_drive_encoders_reached (2880, 2880))
+				if (have_drive_encoders_reached (2880, 2880))//change values
 				{
-					//
-					// Reset the encoders to ensure they are at a known good value.
-					//
 					reset_drive_encoders ();
-
-					//
-					// Stop the motors.
-					//
 					set_drive_power (0.0f, 0.0f);
-
-					//
-					// Transition to the next state when this method is called
-					// again.
-					//
 					step++;
 				}
 				break;
-			//
-			// Wait...
-			//
 			case 2:
 				if (have_drive_encoders_reset ())
 				{
 					step++;
 				}
 				break;
-			//
-			// Turn left until the encoders exceed the specified values.
-			//
 			case 3:
 				run_using_encoders ();
 				set_drive_power (-.5f, 0.5f);
-				if (have_drive_encoders_reached (2880, 2880))
+				if (have_drive_encoders_reached (2880, 2880))//change val
 				{
 					reset_drive_encoders ();
 					set_drive_power (0.0f, 0.0f);
 					step++;
 				}
 				break;
-			//
-			// Wait...
-			//
 			case 4:
 				if (have_drive_encoders_reset ())
 				{
 					step++;
 				}
 				break;
-			//
-			// Turn right until the encoders exceed the specified values.
-			//
 			case 5:
 				run_using_encoders ();
-				set_drive_power (1.0f, -1.0f);
-				if (have_drive_encoders_reached (2880, 2880))
+				set_drive_power (1.0f, 1.0f);
+				if (have_drive_encoders_reached (2880, 2880))//change val
 				{
 					reset_drive_encoders ();
 					set_drive_power (0.0f, 0.0f);
@@ -141,22 +93,138 @@ public class FredAuto extends FredHardware {
                 }
                 break;
             case 7:
-                setArmPosition(0.5f);
-                setBucketPosition(0.5f);
-                break;
+				run_using_encoders ();
+				set_drive_power (-0.5f, 0.5f);
+				if (have_drive_encoders_reached(2880, 2880))//change val
+				{
+					reset_drive_encoders ();
+					set_drive_power (0.0f, 0.0f);
+					step++;
+				}
+				break;
             case 8:
-                // wait
-                if (armServo.getPosition() == armPosition && bucketServo.getPosition() == bucketPosition)
-                {
-                    step++;
-                }
-                telemetry.addData("armServo", armServo.getPosition());
-                telemetry.addData("bucketServo", bucketServo.getPosition());
-                break;
-			//
-			// Perform no action - stay in this case until the OpMode is stopped.
-			// This method will still be called regardless of the state machine.
-			//
+				// wait
+				if (have_drive_encoders_reset())
+				{
+					step++;
+				}
+				break;
+			case 9:
+				setArmPosition(0.6);//change val
+				step++;
+				break;
+			case 10:
+				run_using_encoders ();
+				set_drive_power (1.0f, 1.0f);
+				if (have_drive_encoders_reached(2880, 2880))//change val
+				{
+					reset_drive_encoders ();
+					set_drive_power (0.0f, 0.0f);
+					step++;
+				}
+				break;
+			case 11:
+				// wait
+				if (have_drive_encoders_reset())
+				{
+					step++;
+				}
+				break;
+			case 12:
+				setBucketPosition(0.5);//change val
+				step++;
+				break;
+			case 13:
+				run_using_encoders();
+				set_drive_power (-1.0f, -1.0f);
+				if (have_drive_encoders_reached(2880, 2880))//change val
+				{
+					reset_drive_encoders ();
+					set_drive_power (0.0f, 0.0f);
+					step++;
+				}
+				break;
+			case 14:
+				// wait
+				if (have_drive_encoders_reset())
+				{
+					step++;
+				}
+				break;
+			case 15:
+				setBucketPosition(0.5);//change val
+				setArmPosition(0.1);//change val
+				step++;
+				break;
+			case 16:
+				run_using_encoders ();
+				set_drive_power (0.5f, -0.5f);
+				if (have_drive_encoders_reached(2880, 2880))//change val
+				{
+					reset_drive_encoders ();
+					set_drive_power (0.0f, 0.0f);
+					step++;
+				}
+				break;
+			case 17:
+				// wait
+				if (have_drive_encoders_reset())
+				{
+					step++;
+				}
+				break;
+			case 18:
+				run_using_encoders();
+				set_drive_power (-1.0f, -1.0f);
+				if (have_drive_encoders_reached(2880, 2880))//change val
+				{
+					reset_drive_encoders ();
+					set_drive_power (0.0f, 0.0f);
+					step++;
+				}
+				break;
+			case 19:
+				// wait
+				if (have_drive_encoders_reset())
+				{
+					step++;
+				}
+				break;
+			case 20:
+				run_using_encoders ();
+				set_drive_power (-0.5f, 0.5f);
+				if (have_drive_encoders_reached(2880, 2880))//change val
+				{
+					reset_drive_encoders ();
+					set_drive_power (0.0f, 0.0f);
+					step++;
+				}
+				break;
+			case 21:
+				// wait
+				if (have_drive_encoders_reset())
+				{
+					step++;
+				}
+				break;
+			case 22:
+				run_using_encoders ();
+				set_drive_power (1.0f, 1.0f);
+				if (have_drive_encoders_reached(2880, 2880))//change val
+				{
+					reset_drive_encoders ();
+					set_drive_power (0.0f, 0.0f);
+					step++;
+				}
+				break;
+			case 23:
+				// wait
+				if (have_drive_encoders_reset())
+				{
+					step++;
+				}
+				break;
+
 			default:
 				//
 				// The autonomous actions have been accomplished (i.e. the state has

@@ -73,12 +73,14 @@ public class FredTeleOp extends FredHardware {
 			// if the A button is pushed on gamepad1, increment the position of
 			// the armServo servo.
 			armPosition += armDelta;
+			setArmPosition(armPosition);
 		}
 
 		if (gamepad1.y) {
 			// if the Y button is pushed on gamepad1, decrease the position of
 			// the armServo servo.
 			armPosition -= armDelta;
+			setArmPosition(armPosition);
 		}
 
 		if (gamepad1.left_bumper) {
@@ -91,10 +93,12 @@ public class FredTeleOp extends FredHardware {
 		// update the position of the bucketServo
 		if (gamepad1.x) {
 			bucketPosition += bucketDelta;
+			setBucketPosition(bucketPosition);
 		}
 
 		if (gamepad1.b) {
 			bucketPosition -= bucketDelta;
+			setBucketPosition(bucketPosition);
 		}
 
 		// write position values to the wrist and bucketServo servo
