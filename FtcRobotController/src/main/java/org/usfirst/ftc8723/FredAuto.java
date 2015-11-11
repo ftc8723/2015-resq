@@ -37,9 +37,10 @@ public class FredAuto extends FredHardware {
 			// Synchronize the state machine and hardware.
 			//
 			case 0:
-				reset_drive_encoders ();
+				reset_drive_encoders();
 				step++;
-
+				setBucketPosition(bucketPosition);//change val
+				setArmPosition(armPosition);//change val
 				break;
 			case 1:
 				run_using_encoders ();
@@ -61,7 +62,7 @@ public class FredAuto extends FredHardware {
 				break;
 			case 3:
 				run_using_encoders ();
-				set_drive_power (-.5f, 0.5f);
+				set_drive_power (-0.5f, 0.5f);
 				if (have_drive_encoders_reached (2880, 2880))//change val
 				{
 					reset_drive_encoders ();
@@ -110,7 +111,8 @@ public class FredAuto extends FredHardware {
 				}
 				break;
 			case 9:
-				setArmPosition(0.6);//change val
+				armPosition = 0.6;
+				setArmPosition(armPosition);//change val
 				step++;
 				break;
 			case 10:
@@ -131,7 +133,8 @@ public class FredAuto extends FredHardware {
 				}
 				break;
 			case 12:
-				setBucketPosition(0.5);//change val
+				bucketPosition = 0.5;
+				setBucketPosition(bucketPosition);//change val
 				step++;
 				break;
 			case 13:
@@ -152,8 +155,10 @@ public class FredAuto extends FredHardware {
 				}
 				break;
 			case 15:
-				setBucketPosition(0.5);//change val
-				setArmPosition(0.1);//change val
+				armPosition = 0.1;
+				bucketPosition = 0.5;
+				setBucketPosition(bucketPosition);//change val
+				setArmPosition(armPosition);//change val
 				step++;
 				break;
 			case 16:
