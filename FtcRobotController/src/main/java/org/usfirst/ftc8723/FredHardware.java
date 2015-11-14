@@ -21,11 +21,15 @@ public abstract class FredHardware extends OpMode {
 
     // position of the servos.
     double armPosition, bucketPosition;
+    int numOpLoops;
+    int motorLeftPos;
+    int motorRightPos;
 
     // intended power to the wheels
     float rPower, lPower;
 
     // hardware
+    DcMotorController motorController;
     DcMotor motorRight;
     DcMotor motorLeft;
     Servo bucketServo;
@@ -52,7 +56,17 @@ public abstract class FredHardware extends OpMode {
 		 */
 
         try {
-            motorLeft = hardwareMap.dcMotor.get("motorLeft");
+            motorController = hardwareMap.dcMotorController.get("motorController");
+            if (motorController == null) {
+                hardwareErrors.put("error motorController", "not found");
+            }
+
+        } catch (Exception e) {
+            hardwareErrors.put("error motorLeft", e.getMessage());
+        }
+
+        try {
+        motorLeft = hardwareMap.dcMotor.get("motorLeft");
             if (motorLeft == null) {
                 hardwareErrors.put("error motorLeft", "not found");
             }
@@ -134,6 +148,28 @@ public abstract class FredHardware extends OpMode {
     public void loop() {
         // perform the normal loop functions inside a try/catch to improve error handling
         try {
+            if (numOpLoops % 17 == 0){
+                motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_ONLY);
+            }
+
+            // Every 17 loops, switch to read mode so we can read data from the NXT device.
+            // Only necessary on NXT devices.
+            if (motorController.getMotorControllerDeviceMode() == DcMotorController.DeviceMode.READ_ONLY) {
+
+                // Update the reads after some loops, when the command has successfully propagated through.
+                motorLeftPos = motorLeft.getCurrentPosition();
+                motorRightPos = motorRight.getCurrentPosition();
+                //telemetry.addData("left motor", motorLeft.getPower());
+                //telemetry.addData("right motor", motorRight.getPower());
+                telemetry.addData("RunMode: ", motorLeft.getMode().toString());
+
+                // Only needed on Nxt devices, but not on USB devices
+                motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.WRITE_ONLY);
+
+                // Reset the loop
+                numOpLoops = 0;
+            }
+            numOpLoops++;
             innerLoop();
 
             // Send telemetry data back to driver station. Note that if we are using
@@ -194,15 +230,17 @@ public abstract class FredHardware extends OpMode {
     /**
      * Reset both drive wheel encoders.
      */
-    public void reset_drive_encoders()
+    public boolean reset_drive_encoders() {
 
-    {
-        //
         // Reset the motor encoders on the drive wheels.
-        //
-        reset_left_drive_encoder();
-        reset_right_drive_encoder();
-
+        if (motorController.getMotorControllerDeviceMode()== DcMotorController.DeviceMode.WRITE_ONLY) {
+            reset_left_drive_encoder();
+            reset_right_drive_encoder();
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     public void run_using_left_drive_encoder()
@@ -239,9 +277,8 @@ public abstract class FredHardware extends OpMode {
     /**
      * Scale the joystick input using a nonlinear algorithm.
      */
-    void set_drive_power(double p_left_power, double p_right_power)
+    void set_drive_power(double p_left_power, double p_right_power) {
 
-    {
         if (motorLeft != null) {
             motorLeft.setPower(p_left_power);
         }
@@ -265,7 +302,7 @@ public abstract class FredHardware extends OpMode {
             //
             // TODO Implement stall code using these variables.
             //
-            if (Math.abs(motorRight.getCurrentPosition()) > p_count) {
+            if (Math.abs(motorRightPos) > p_count) {
                 success = true;
             }
         }
@@ -288,7 +325,7 @@ public abstract class FredHardware extends OpMode {
             //
             // TODO Implement stall code using these variables.
             //
-            if (Math.abs(motorLeft.getCurrentPosition()) > p_count) {
+            if (Math.abs(motorLeftPos) > p_count) {
                 success = true;
             }
         }
@@ -304,7 +341,7 @@ public abstract class FredHardware extends OpMode {
         int value = 0;
 
         if (motorLeft != null) {
-            value = motorLeft.getCurrentPosition();
+            value = motorLeftPos;
         }
 
         return value;
@@ -320,7 +357,7 @@ public abstract class FredHardware extends OpMode {
         int value = 0;
 
         if (motorRight != null) {
-            value = motorRight.getCurrentPosition();
+            value = motorRightPos;
         }
 
         return value;
@@ -374,7 +411,7 @@ public abstract class FredHardware extends OpMode {
 
     }
 
-    final static double ARM_MIN_RANGE = 0.20;
+    final static double ARM_MIN_RANGE = 0.10;
     final static double ARM_MAX_RANGE = 0.90;
 
     public void setArmPosition(double pos) {
@@ -401,7 +438,7 @@ public abstract class FredHardware extends OpMode {
     }
 
     final static double BUCKET_MIN_RANGE = 0.20;
-    final static double BUCKET_MAX_RANGE = 0.7;
+    final static double BUCKET_MAX_RANGE = 0.99;
 
     public void setBucketPosition(double pos) {
         // clip the position values so that they never exceed their allowed range.

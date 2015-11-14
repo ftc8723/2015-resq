@@ -12,14 +12,17 @@ public class FredAuto extends FredHardware {
      */
     @Override
     public void init() {
+		super.init();
         // try this
         // DcMotorController motorController = hardwareMap.dcMotorController.get("motorController");
         // motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
 
-        // assign the starting position of the wrist and bucketServo
-        armPosition = 0.2;
-        bucketPosition = 0.2;
-    }
+        // assign the starting position of the arm and bucketServo
+		armPosition = 0.1;
+		bucketPosition = 1.0;
+		setArmPosition(armPosition);
+		setBucketPosition(bucketPosition);
+	}
 
 
     /*
@@ -29,7 +32,7 @@ public class FredAuto extends FredHardware {
      */
 	@Override public void innerLoop () {
 
-        // todo we should think about what to do if someone gets in our way... can we pause the program?
+        //we should think about what to do if someone gets in our way... can we pause the program?
 
 		switch (step)
 		{
@@ -111,8 +114,7 @@ public class FredAuto extends FredHardware {
 				}
 				break;
 			case 9:
-				armPosition = 0.6;
-				setArmPosition(armPosition);//change val
+				setArmPosition(0.6d);//change val
 				step++;
 				break;
 			case 10:
@@ -133,8 +135,7 @@ public class FredAuto extends FredHardware {
 				}
 				break;
 			case 12:
-				bucketPosition = 0.5;
-				setBucketPosition(bucketPosition);//change val
+				setBucketPosition(0.4d);//change val
 				step++;
 				break;
 			case 13:
@@ -155,10 +156,8 @@ public class FredAuto extends FredHardware {
 				}
 				break;
 			case 15:
-				armPosition = 0.1;
-				bucketPosition = 0.5;
-				setBucketPosition(bucketPosition);//change val
-				setArmPosition(armPosition);//change val
+				setBucketPosition(1.0d);//change val
+				setArmPosition(0.2d);//change val
 				step++;
 				break;
 			case 16:
