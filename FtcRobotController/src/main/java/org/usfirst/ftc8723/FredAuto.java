@@ -40,120 +40,138 @@ public class FredAuto extends FredHardware {
 			// Synchronize the state machine and hardware.
 			//
 			case 0:
-				reset_drive_encoders();
+				//reset_drive_encoders();
 				step++;
 				setBucketPosition(bucketPosition);//change val
 				setArmPosition(armPosition);//change val
 				break;
 			case 1:
-				run_using_encoders ();
+				//run_using_encoders ();
 
-				set_drive_power (1.0f, 1.0f);
+				//set_drive_power (1.0f, 1.0f);
 
-				if (have_drive_encoders_reached (2880, 2880))//change values
+				/*if (have_drive_encoders_reached (2880, 2880))//change values
 				{
 					reset_drive_encoders ();
 					set_drive_power (0.0f, 0.0f);
 					step++;
-				}
+				}*/
+				driveForTime(1.0f, 1.0f, 1);
+				step++;
 				break;
 			case 2:
-				if (have_drive_encoders_reset ())
-				{
-					step++;
-				}
+//				if (have_drive_encoders_reset ())
+//				{
+//					step++;
+//				}
+				step++;
 				break;
 			case 3:
-				run_using_encoders ();
-				set_drive_power (-0.5f, 0.5f);
-				if (have_drive_encoders_reached (2880, 2880))//change val
-				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
-					step++;
-				}
+//				run_using_encoders ();
+//				set_drive_power (-0.5f, 0.5f);
+//				if (have_drive_encoders_reached (2880, 2880))//change val
+//				{
+//					reset_drive_encoders ();
+//					set_drive_power (0.0f, 0.0f);
+//					step++;
+//				}
+				driveForTime(-0.5f, 0.5f, 100);
+				step++;
 				break;
 			case 4:
-				if (have_drive_encoders_reset ())
-				{
-					step++;
-				}
+//				if (have_drive_encoders_reset ())
+//				{
+//					step++;
+//				}
+				step++;
 				break;
 			case 5:
-				run_using_encoders ();
-				set_drive_power (1.0f, 1.0f);
-				if (have_drive_encoders_reached (2880, 2880))//change val
-				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
-					step++;
-				}
+//				run_using_encoders ();
+//				set_drive_power (1.0f, 1.0f);
+//				if (have_drive_encoders_reached (2880, 2880))//change val
+//				{
+//					reset_drive_encoders ();
+//					set_drive_power (0.0f, 0.0f);
+//					step++;
+//				}
+				driveForTime(1.0f, 1.0f, 100);
+				step++;
 				break;
             case 6:
                 // wait
-                if (have_drive_encoders_reset())
-                {
-                    step++;
-                }
+//                if (have_drive_encoders_reset())
+//                {
+//                    step++;
+//                }
+				step++;
                 break;
             case 7:
-				run_using_encoders ();
-				set_drive_power (-0.5f, 0.5f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
-				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
-					step++;
-				}
+//				run_using_encoders ();
+//				set_drive_power (-0.5f, 0.5f);
+//				if (have_drive_encoders_reached(2880, 2880))//change val
+//				{
+//					reset_drive_encoders ();
+//					set_drive_power (0.0f, 0.0f);
+//					step++;
+//				}
+				driveForTime(-0.5f, 0.5f, 100);
+				step++;
 				break;
             case 8:
 				// wait
-				if (have_drive_encoders_reset())
-				{
-					step++;
-				}
+//				if (have_drive_encoders_reset())
+//				{
+//					step++;
+//				}
+				step++;
 				break;
 			case 9:
 				setArmPosition(0.6d);//change val
 				step++;
 				break;
 			case 10:
-				run_using_encoders ();
-				set_drive_power (1.0f, 1.0f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
-				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
-					step++;
-				}
+//				run_using_encoders ();
+//				set_drive_power (1.0f, 1.0f);
+//				if (have_drive_encoders_reached(2880, 2880))//change val
+//				{
+//					reset_drive_encoders ();
+//					set_drive_power (0.0f, 0.0f);
+//					step++;
+//				}
+				driveForTime(1.0f, 1.0f, 100);
+				step++;
 				break;
 			case 11:
 				// wait
-				if (have_drive_encoders_reset())
-				{
-					step++;
-				}
+//				if (have_drive_encoders_reset())
+//				{
+//					step++;
+//				}
+				step++;
 				break;
 			case 12:
 				setBucketPosition(0.4d);//change val
 				step++;
 				break;
 			case 13:
-				run_using_encoders();
-				set_drive_power (-1.0f, -1.0f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
-				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
-					step++;
-				}
+//				run_using_encoders();
+//				set_drive_power (-1.0f, -1.0f);
+//				if (have_drive_encoders_reached(2880, 2880))//change val
+//				{
+//					reset_drive_encoders ();
+//					set_drive_power (0.0f, 0.0f);
+//					step++;
+//				}
+				driveForTime(-1.0f, -1.0f, 100);
+				step++;
 				break;
 			case 14:
 				// wait
-				if (have_drive_encoders_reset())
-				{
-					step++;
-				}
+//				if (have_drive_encoders_reset())
+//				{
+//					step++;
+//				}
+				step++;
 				break;
 			case 15:
 				setBucketPosition(1.0d);//change val
@@ -161,72 +179,84 @@ public class FredAuto extends FredHardware {
 				step++;
 				break;
 			case 16:
-				run_using_encoders ();
-				set_drive_power (0.5f, -0.5f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
-				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
-					step++;
-				}
+//				run_using_encoders ();
+//				set_drive_power (0.5f, -0.5f);
+//				if (have_drive_encoders_reached(2880, 2880))//change val
+//				{
+//					reset_drive_encoders ();
+//					set_drive_power (0.0f, 0.0f);
+//					step++;
+//				}
+				driveForTime(0.5f, -0.5f, 100);
+				step++;
 				break;
 			case 17:
 				// wait
-				if (have_drive_encoders_reset())
-				{
-					step++;
-				}
+//				if (have_drive_encoders_reset())
+//				{
+//					step++;
+//				}
+				step++;
 				break;
 			case 18:
-				run_using_encoders();
-				set_drive_power (-1.0f, -1.0f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
-				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
-					step++;
-				}
+//				run_using_encoders();
+//				set_drive_power (-1.0f, -1.0f);
+//				if (have_drive_encoders_reached(2880, 2880))//change val
+//				{
+//					reset_drive_encoders ();
+//					set_drive_power (0.0f, 0.0f);
+//					step++;
+//				}
+				driveForTime(-1.0f, -1.0f, 100);
+				step++;
 				break;
 			case 19:
 				// wait
-				if (have_drive_encoders_reset())
-				{
-					step++;
-				}
+//				if (have_drive_encoders_reset())
+//				{
+//					step++;
+//				}
+				step++;
 				break;
 			case 20:
-				run_using_encoders ();
-				set_drive_power (-0.5f, 0.5f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
-				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
-					step++;
-				}
+//				run_using_encoders ();
+//				set_drive_power (-0.5f, 0.5f);
+//				if (have_drive_encoders_reached(2880, 2880))//change val
+//				{
+//					reset_drive_encoders ();
+//					set_drive_power (0.0f, 0.0f);
+//					step++;
+//				}
+				driveForTime(-0.5f, 0.5f, 100);
+				step++;
 				break;
 			case 21:
 				// wait
-				if (have_drive_encoders_reset())
-				{
-					step++;
-				}
+//				if (have_drive_encoders_reset())
+//				{
+//					step++;
+//				}
+				step++;
 				break;
 			case 22:
-				run_using_encoders ();
-				set_drive_power (1.0f, 1.0f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
-				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
-					step++;
-				}
+//				run_using_encoders ();
+//				set_drive_power (-1.0f, -1.0f);
+//				if (have_drive_encoders_reached(2880, 2880))//change val
+//				{
+//					reset_drive_encoders ();
+//					set_drive_power (0.0f, 0.0f);
+//					step++;
+//				}
+				driveForTime(-1.0f, -1.0f, 100);
+				step++;
 				break;
 			case 23:
 				// wait
-				if (have_drive_encoders_reset())
-				{
-					step++;
-				}
+//				if (have_drive_encoders_reset())
+//				{
+//					step++;
+//				}
+				step++;
 				break;
 
 			default:

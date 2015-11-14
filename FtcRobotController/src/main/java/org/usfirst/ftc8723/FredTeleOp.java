@@ -27,7 +27,7 @@ public class FredTeleOp extends FredHardware {
         // motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
 
 		// assign the starting position of the wrist and bucketServo
-		armPosition = 0.1;
+		armPosition = 0.35;
 		bucketPosition = 1.0;
 		setArmPosition(armPosition);
 		setBucketPosition(bucketPosition);
@@ -101,6 +101,10 @@ public class FredTeleOp extends FredHardware {
 		if (gamepad1.b) {
 			bucketPosition -= bucketDelta;
 			setBucketPosition(bucketPosition);
+		}
+
+		if (gamepad1.left_stick_button) {
+
 		}
 
 		// write position values to the wrist and bucketServo servo
