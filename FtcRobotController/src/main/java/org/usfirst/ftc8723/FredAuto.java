@@ -14,13 +14,9 @@ public class FredAuto extends FredHardware {
     public void init() {
 		super.init();
 
-        // try this
-        // DcMotorController motorController = hardwareMap.dcMotorController.get("motorController");
-        // motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
-
         // assign the starting position of the wrist and bucketServo
-        armPosition = 0.2;
-        bucketPosition = 0.2;
+        setArmPosition(0.2);
+        setBucketPosition(0.2);
     }
 
 
@@ -29,9 +25,10 @@ public class FredAuto extends FredHardware {
      *
      * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#run()
      */
-	@Override public void innerLoop () {
+	@Override
+    public void innerLoop () {
 
-        // todo we should think about what to do if someone gets in our way... can we pause the program?
+        // todo think about what to do if someone gets in our way - how can we pause and automatically resume?
 
 		switch (step)
 		{
@@ -41,8 +38,6 @@ public class FredAuto extends FredHardware {
 			case 0:
 				resetDriveEncoders();
 				step++;
-				setBucketPosition(bucketPosition);
-				setArmPosition(armPosition);
 				break;
 			case 1:
 				runUsingEncoders();
@@ -113,8 +108,7 @@ public class FredAuto extends FredHardware {
 				}
 				break;
 			case 9:
-				armPosition = 0.6;
-				setArmPosition(armPosition);//change val
+				setArmPosition(0.6);
 				step++;
 				break;
 			case 10:
@@ -135,8 +129,7 @@ public class FredAuto extends FredHardware {
 				}
 				break;
 			case 12:
-				bucketPosition = 0.5;
-				setBucketPosition(bucketPosition);//change val
+				setBucketPosition(0.5);
 				step++;
 				break;
 			case 13:
@@ -157,10 +150,8 @@ public class FredAuto extends FredHardware {
 				}
 				break;
 			case 15:
-				armPosition = 0.1;
-				bucketPosition = 0.5;
-				setBucketPosition(bucketPosition);//change val
-				setArmPosition(armPosition);//change val
+				setArmPosition(0.1);
+				setBucketPosition(0.5);
 				step++;
 				break;
 			case 16:

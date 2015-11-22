@@ -19,11 +19,11 @@ public abstract class FredHardware extends OpMode {
      * Also, as the bucketServo servo approaches 0, the bucketServo opens up (drops the game element).
      */
 
-    // position of the servos.
-    double armPosition, bucketPosition;
-
-    // intended power to the wheels
-    float rPower, lPower;
+    // position of the servos & power to the wheels
+    private double armPosition;
+    private double bucketPosition;
+    private double lPower;
+    private double rPower;
 
     // hardware
     DcMotor motorLeft;
@@ -35,7 +35,6 @@ public abstract class FredHardware extends OpMode {
 
     // hardware errors
     Map<String, String> hardwareErrors = new HashMap<String, String>();
-
 
     /*
      * Code to run when the op mode is first enabled goes here
@@ -130,6 +129,11 @@ public abstract class FredHardware extends OpMode {
      */
     public abstract void innerLoop();
 
+    /*
+     * This method will be called repeatedly in a loop
+     *
+     * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#run()
+     */
     @Override
     public void loop() {
         // perform the normal loop functions inside a try/catch to improve error handling
@@ -147,10 +151,8 @@ public abstract class FredHardware extends OpMode {
             telemetry.addData("motor-L", "pwr: " + String.format("%.2f", lPower));// + "," + motorLeft.getCurrentPosition());
             telemetry.addData("motor-R", "pwr: " + String.format("%.2f", rPower));//+ "," + motorRight.getCurrentPosition());
 
-            telemetry.addData("armPosition.set", armPosition);
-            telemetry.addData("bucketPosition.set", bucketPosition);
-            telemetry.addData("armPosition.get", armServo.getPosition());
-            telemetry.addData("bucketPosition.get", bucketServo.getPosition());
+            telemetry.addData("armPosition.set/get", String.format("%.2f,%.2f", armPosition, armServo.getPosition()));
+            telemetry.addData("bucketPosition.set/get", String.format("%.2f,%.2f", bucketPosition, bucketServo.getPosition()));
 
         } catch (RuntimeException e) {
             String message = e.getMessage();
@@ -201,16 +203,11 @@ public abstract class FredHardware extends OpMode {
     /**
      * Scale the joystick input using a nonlinear algorithm.
      */
-    void setDrivePower(double p_left_power, double p_right_power)
-
-    {
-        if (motorLeft != null) {
-            motorLeft.setPower(p_left_power);
-        }
-        if (motorRight != null) {
-            motorRight.setPower(p_right_power);
-        }
-
+    void setDrivePower(double left, double right) {
+        lPower = left;
+        rPower = right;
+        if (motorLeft != null) motorLeft.setPower(left);
+        if (motorRight != null) motorRight.setPower(right);
     }
 
     /**
@@ -256,40 +253,46 @@ public abstract class FredHardware extends OpMode {
         return (leftEncoder() == 0) && (rightEncoder() == 0);
     }
 
-    final static double ARM_MIN_RANGE = 0.20;
-    final static double ARM_MAX_RANGE = 0.90;
 
+
+    /**
+     * sets the arm position to a specific value, after clipping to hardcoded ranges
+     * @param pos the desired position
+     */
     public void setArmPosition(double pos) {
         // clip the position values so that they never exceed their allowed range.
-        armPosition = Range.clip(pos, ARM_MIN_RANGE, ARM_MAX_RANGE);
+        armPosition = Range.clip(pos, ARM_MIN, ARM_MAX);
 
         // write position values to the wrist and bucketServo servo
         armServo.setPosition(armPosition);
     }
 
-    public void setArmPositionAndWait(double pos, int waitMS) {
-        long start = System.currentTimeMillis();
-        setArmPosition(pos);
-        while (System.currentTimeMillis() > start + waitMS) {
-            try {
-                Thread.sleep(waitMS / 10);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-            if (armServo.getPosition() == pos) {
-                break;
-            }
-        }
+    /**
+     * changes the arm position by the given amount, after clipping to hardcoded ranges
+     * @param delta amount to change by
+     */
+    public void adjustArmPosition(double delta) {
+        setArmPosition(armPosition+delta);
     }
-
-    final static double BUCKET_MIN_RANGE = 0.20;
-    final static double BUCKET_MAX_RANGE = 0.7;
 
     public void setBucketPosition(double pos) {
         // clip the position values so that they never exceed their allowed range.
-        bucketPosition = Range.clip(pos, BUCKET_MIN_RANGE, BUCKET_MAX_RANGE);
+        bucketPosition = Range.clip(pos, BUCKET_MIN, BUCKET_MAX);
 
         // write position values to the wrist and bucketServo servo
         bucketServo.setPosition(bucketPosition);
     }
+
+    /**
+     * changes the bucket position by the given amount, after clipping to hardcoded ranges
+     * @param delta amount to change by
+     */
+    public void adjustBucketPosition(double delta) {
+        setBucketPosition(bucketPosition + delta);
+    }
+
+    final static double ARM_MIN = 0.20;
+    final static double ARM_MAX = 0.90;
+    final static double BUCKET_MIN = 0.20;
+    final static double BUCKET_MAX = 0.7;
 }
