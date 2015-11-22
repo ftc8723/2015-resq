@@ -26,8 +26,8 @@ public abstract class FredHardware extends OpMode {
     float rPower, lPower;
 
     // hardware
-    DcMotor motorRight;
     DcMotor motorLeft;
+    DcMotor motorRight;
     Servo bucketServo;
     Servo armServo;
     ColorSensor colorSensor;
@@ -168,56 +168,30 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
-     * Reset the left drive wheel encoder.
+     * Reset both drive wheel encoders.
      */
-    public void reset_left_drive_encoder()
-
-    {
+    public void resetDriveEncoders() {
+        //
+        // Reset the motor encoders on the drive wheels.
+        //
         if (motorLeft != null) {
             motorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
 
-    }
-
-    /**
-     * Reset the right drive wheel encoder.
-     */
-    public void reset_right_drive_encoder()
-
-    {
         if (motorRight != null) {
             motorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
-
     }
 
     /**
-     * Reset both drive wheel encoders.
+     * Set both drive wheel encoders to run, if the mode is appropriate.
      */
-    public void reset_drive_encoders()
-
-    {
-        //
-        // Reset the motor encoders on the drive wheels.
-        //
-        reset_left_drive_encoder();
-        reset_right_drive_encoder();
-
-    }
-
-    public void run_using_left_drive_encoder()
-    {
+    public void runUsingEncoders() {
+        // perform the action on both motors.
         if (motorLeft != null) {
             motorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         }
 
-    }
-
-    /**
-     * Set the right drive wheel encoder to run, if the mode is appropriate.
-     */
-    public void run_using_right_drive_encoder()
-    {
         if (motorRight != null) {
             motorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         }
@@ -225,21 +199,9 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
-     * Set both drive wheel encoders to run, if the mode is appropriate.
-     */
-    public void run_using_encoders()
-
-    {
-        // perform the action on both motors.
-        run_using_left_drive_encoder();
-        run_using_right_drive_encoder();
-
-    }
-
-    /**
      * Scale the joystick input using a nonlinear algorithm.
      */
-    void set_drive_power(double p_left_power, double p_right_power)
+    void setDrivePower(double p_left_power, double p_right_power)
 
     {
         if (motorLeft != null) {
@@ -248,52 +210,6 @@ public abstract class FredHardware extends OpMode {
         if (motorRight != null) {
             motorRight.setPower(p_right_power);
         }
-
-    } // set_drive_power
-
-    /**
-     * Indicate whether the right drive motor's encoder has reached a value.
-     */
-    boolean has_right_drive_encoder_reached(double p_count)
-
-    {
-        boolean success = false;
-
-        if (motorRight != null) {
-            //
-            // Have the encoders reached the specified values?
-            //
-            // TODO Implement stall code using these variables.
-            //
-            if (Math.abs(motorRight.getCurrentPosition()) > p_count) {
-                success = true;
-            }
-        }
-
-        return success;
-
-    }
-
-    /**
-     * Indicate whether the left drive motor's encoder has reached a value.
-     */
-    boolean has_left_drive_encoder_reached(double p_count)
-
-    {
-        boolean success = false;
-
-        if (motorLeft != null) {
-            //
-            // Has the encoder reached the specified values?
-            //
-            // TODO Implement stall code using these variables.
-            //
-            if (Math.abs(motorLeft.getCurrentPosition()) > p_count) {
-                success = true;
-            }
-        }
-
-        return success;
 
     }
 
@@ -308,15 +224,12 @@ public abstract class FredHardware extends OpMode {
         }
 
         return value;
-
     }
 
     /**
      * Access the right encoder's count.
      */
-    int rightEncoder()
-
-    {
+    int rightEncoder() {
         int value = 0;
 
         if (motorRight != null) {
@@ -324,54 +237,23 @@ public abstract class FredHardware extends OpMode {
         }
 
         return value;
-
     }
 
     /**
      * Indicate whether the drive motors' encoders have reached a value.
      */
-    boolean have_drive_encoders_reached(double leftCount, double rightCount) {
-
-        return has_left_drive_encoder_reached(leftCount) && has_right_drive_encoder_reached(rightCount);
-
-    }
-
-    /**
-     * Indicate whether the left drive encoder has been completely reset.
-     */
-    boolean has_left_drive_encoder_reset() {
-        boolean success = false; // assume failure
-
-        // Has the left encoder reached zero?
-        if (leftEncoder() == 0) {
-            success = true;
-        }
-
-        return success;
-
-    }
-
-    /**
-     * Indicate whether the left drive encoder has been completely reset.
-     */
-    boolean has_right_drive_encoder_reset() {
-        boolean success = false;  // Assume failure
-
-        // Has the right encoder reached zero?
-        if (rightEncoder() == 0) {
-            success = true;
-        }
-
-        return success;
-
+    boolean haveDriveEncodersReached(double leftCount, double rightCount) {
+        boolean leftSuccess = Math.abs(leftEncoder()) > leftCount;
+        boolean rightSuccess = Math.abs(leftEncoder()) > rightCount;
+        return leftSuccess && rightSuccess;
     }
 
     /**
      * Indicate whether the encoders have been completely reset.
      */
-    boolean have_drive_encoders_reset() {
-        return has_left_drive_encoder_reset() && has_right_drive_encoder_reset();
-
+    boolean haveDriveEncodersReset() {
+        // return true if both encoders are zero
+        return (leftEncoder() == 0) && (rightEncoder() == 0);
     }
 
     final static double ARM_MIN_RANGE = 0.20;

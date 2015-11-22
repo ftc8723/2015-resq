@@ -10,8 +10,8 @@ import com.qualcomm.robotcore.util.Range;
 public class FredTeleOp extends FredHardware {
 
 	// amount to change the armServo and servo positions by
-	double armDelta = 0.05;
-	double bucketDelta = 0.05;
+	final double armDelta = 0.001;
+	final double bucketDelta = 0.002;
 
 	/*
 	 * Code to run when the op mode is first enabled goes here
@@ -27,8 +27,10 @@ public class FredTeleOp extends FredHardware {
         // motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
 
 		// assign the starting position of the wrist and bucketServo
-		armPosition = 0.5;
-		bucketPosition = 0.5;
+		armPosition = 0.35;
+		bucketPosition = 1.0;
+		setArmPosition(armPosition);
+		setBucketPosition(bucketPosition);
 	}
 
 	/*

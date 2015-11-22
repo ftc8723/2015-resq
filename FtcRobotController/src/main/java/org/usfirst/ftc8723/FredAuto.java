@@ -12,6 +12,8 @@ public class FredAuto extends FredHardware {
      */
     @Override
     public void init() {
+		super.init();
+
         // try this
         // DcMotorController motorController = hardwareMap.dcMotorController.get("motorController");
         // motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
@@ -37,75 +39,75 @@ public class FredAuto extends FredHardware {
 			// Synchronize the state machine and hardware.
 			//
 			case 0:
-				reset_drive_encoders();
+				resetDriveEncoders();
 				step++;
-				setBucketPosition(bucketPosition);//change val
-				setArmPosition(armPosition);//change val
+				setBucketPosition(bucketPosition);
+				setArmPosition(armPosition);
 				break;
 			case 1:
-				run_using_encoders ();
+				runUsingEncoders();
 
-				set_drive_power (1.0f, 1.0f);
+				setDrivePower(1.0f, 1.0f);
 
-				if (have_drive_encoders_reached (2880, 2880))//change values
+				if (haveDriveEncodersReached(2880, 2880))//change values
 				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
+					resetDriveEncoders();
+					setDrivePower(0.0f, 0.0f);
 					step++;
 				}
 				break;
 			case 2:
-				if (have_drive_encoders_reset ())
+				if (haveDriveEncodersReset())
 				{
 					step++;
 				}
 				break;
 			case 3:
-				run_using_encoders ();
-				set_drive_power (-0.5f, 0.5f);
-				if (have_drive_encoders_reached (2880, 2880))//change val
+				runUsingEncoders();
+				setDrivePower(-0.5f, 0.5f);
+				if (haveDriveEncodersReached(2880, 2880))//change val
 				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
+					resetDriveEncoders();
+					setDrivePower(0.0f, 0.0f);
 					step++;
 				}
 				break;
 			case 4:
-				if (have_drive_encoders_reset ())
+				if (haveDriveEncodersReset())
 				{
 					step++;
 				}
 				break;
 			case 5:
-				run_using_encoders ();
-				set_drive_power (1.0f, 1.0f);
-				if (have_drive_encoders_reached (2880, 2880))//change val
+				runUsingEncoders();
+				setDrivePower(1.0f, 1.0f);
+				if (haveDriveEncodersReached(2880, 2880))//change val
 				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
+					resetDriveEncoders();
+					setDrivePower(0.0f, 0.0f);
 					step++;
 				}
 				break;
             case 6:
                 // wait
-                if (have_drive_encoders_reset())
+                if (haveDriveEncodersReset())
                 {
                     step++;
                 }
                 break;
             case 7:
-				run_using_encoders ();
-				set_drive_power (-0.5f, 0.5f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
+				runUsingEncoders();
+				setDrivePower(-0.5f, 0.5f);
+				if (haveDriveEncodersReached(2880, 2880))//change val
 				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
+					resetDriveEncoders();
+					setDrivePower(0.0f, 0.0f);
 					step++;
 				}
 				break;
             case 8:
 				// wait
-				if (have_drive_encoders_reset())
+				if (haveDriveEncodersReset())
 				{
 					step++;
 				}
@@ -116,18 +118,18 @@ public class FredAuto extends FredHardware {
 				step++;
 				break;
 			case 10:
-				run_using_encoders ();
-				set_drive_power (1.0f, 1.0f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
+				runUsingEncoders();
+				setDrivePower(1.0f, 1.0f);
+				if (haveDriveEncodersReached(2880, 2880))//change val
 				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
+					resetDriveEncoders();
+					setDrivePower(0.0f, 0.0f);
 					step++;
 				}
 				break;
 			case 11:
 				// wait
-				if (have_drive_encoders_reset())
+				if (haveDriveEncodersReset())
 				{
 					step++;
 				}
@@ -138,18 +140,18 @@ public class FredAuto extends FredHardware {
 				step++;
 				break;
 			case 13:
-				run_using_encoders();
-				set_drive_power (-1.0f, -1.0f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
+				runUsingEncoders();
+				setDrivePower(-1.0f, -1.0f);
+				if (haveDriveEncodersReached(2880, 2880))//change val
 				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
+					resetDriveEncoders();
+					setDrivePower(0.0f, 0.0f);
 					step++;
 				}
 				break;
 			case 14:
 				// wait
-				if (have_drive_encoders_reset())
+				if (haveDriveEncodersReset())
 				{
 					step++;
 				}
@@ -162,69 +164,69 @@ public class FredAuto extends FredHardware {
 				step++;
 				break;
 			case 16:
-				run_using_encoders ();
-				set_drive_power (0.5f, -0.5f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
+				runUsingEncoders();
+				setDrivePower(0.5f, -0.5f);
+				if (haveDriveEncodersReached(2880, 2880))//change val
 				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
+					resetDriveEncoders();
+					setDrivePower(0.0f, 0.0f);
 					step++;
 				}
 				break;
 			case 17:
 				// wait
-				if (have_drive_encoders_reset())
+				if (haveDriveEncodersReset())
 				{
 					step++;
 				}
 				break;
 			case 18:
-				run_using_encoders();
-				set_drive_power (-1.0f, -1.0f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
+				runUsingEncoders();
+				setDrivePower(-1.0f, -1.0f);
+				if (haveDriveEncodersReached(2880, 2880))//change val
 				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
+					resetDriveEncoders();
+					setDrivePower(0.0f, 0.0f);
 					step++;
 				}
 				break;
 			case 19:
 				// wait
-				if (have_drive_encoders_reset())
+				if (haveDriveEncodersReset())
 				{
 					step++;
 				}
 				break;
 			case 20:
-				run_using_encoders ();
-				set_drive_power (-0.5f, 0.5f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
+				runUsingEncoders();
+				setDrivePower(-0.5f, 0.5f);
+				if (haveDriveEncodersReached(2880, 2880))//change val
 				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
+					resetDriveEncoders();
+					setDrivePower(0.0f, 0.0f);
 					step++;
 				}
 				break;
 			case 21:
 				// wait
-				if (have_drive_encoders_reset())
+				if (haveDriveEncodersReset())
 				{
 					step++;
 				}
 				break;
 			case 22:
-				run_using_encoders ();
-				set_drive_power (1.0f, 1.0f);
-				if (have_drive_encoders_reached(2880, 2880))//change val
+				runUsingEncoders();
+				setDrivePower(1.0f, 1.0f);
+				if (haveDriveEncodersReached(2880, 2880))//change val
 				{
-					reset_drive_encoders ();
-					set_drive_power (0.0f, 0.0f);
+					resetDriveEncoders();
+					setDrivePower(0.0f, 0.0f);
 					step++;
 				}
 				break;
 			case 23:
 				// wait
-				if (have_drive_encoders_reset())
+				if (haveDriveEncodersReset())
 				{
 					step++;
 				}
