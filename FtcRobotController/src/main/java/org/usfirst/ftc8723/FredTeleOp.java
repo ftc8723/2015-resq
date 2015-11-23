@@ -9,10 +9,6 @@ import com.qualcomm.robotcore.util.Range;
  */
 public class FredTeleOp extends FredHardware {
 
-	// amount to change the armServo and servo positions by
-	double armDelta = 0.05;
-	double bucketDelta = 0.05;
-
 	/*
 	 * Code to run when the op mode is first enabled goes here
 	 *
@@ -22,88 +18,58 @@ public class FredTeleOp extends FredHardware {
 	public void init() {
 		super.init();
 
-        // try this
-        // DcMotorController motorController = hardwareMap.dcMotorController.get("motorController");
-        // motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
-
 		// assign the starting position of the wrist and bucketServo
-		armPosition = 0.5;
-		bucketPosition = 0.5;
+		setArmPosition(0.35);
+		setBucketPosition(1.0);
 	}
 
 	/*
 	 * This method will be called repeatedly in a loop
-	 * 
+	 *
 	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#run()
 	 */
 	@Override
 	public void innerLoop() {
 
-		/*
-		 * Gamepad 1
-		 * 
-		 * Gamepad 1 controls the motors via the left stick, and it controls the
-		 * wrist/bucketServo via the a,b, x, y buttons
-		 */
+		 // gamepad1 controls the motors via the left stick, and the
+		 // bucketServo via the a,b, x, y buttons
 
-		// throttle: left_stick_y ranges from -1 to 1, where -1 is full up, and
-		// 1 is full down
-		// direction: left_stick_x ranges from -1 to 1, where -1 is full left
-		// and 1 is full right
+		// throttle: left_stick_y ranges from -1 (full up) to 1 (full down)
+		// direction: left_stick_x ranges from -1 (full left) to 1 (full right)
 		float throttle = -gamepad1.left_stick_y;
 		float direction = gamepad1.left_stick_x;
-		rPower = throttle - direction;
-		lPower = throttle + direction;
+		double left = throttle - direction;
+		double right = throttle + direction;
 
 		// clip the right/left values so that the values never exceed +/- 1
-		rPower = Range.clip(rPower, -1, 1);
-		lPower = Range.clip(lPower, -1, 1);
+		left = Range.clip(left, -1, 1);
+		right = Range.clip(right, -1, 1);
 
 		// scale the joystick value to make it easier to control
 		// the robot more precisely at slower speeds.
-		rPower = (float)scaleInput(rPower);
-		lPower =  (float)scaleInput(lPower);
+		left = scaleInput(left);
+		right =  scaleInput(right);
 
 		// write the values to the motors
-		motorRight.setPower(rPower);
-		motorLeft.setPower(lPower);
+		setDrivePower(right, left);
 
-		// update the position of the armServo.
+		// check gamepad buttons and adjust servos accordingly
 		if (gamepad1.a) {
-			// if the A button is pushed on gamepad1, increment the position of
-			// the armServo servo.
-			armPosition += armDelta;
-			setArmPosition(armPosition);
+			// if A is pushed, increase the position of the arm servo
+			adjustArmPosition(ARM_DELTA);
 		}
-
 		if (gamepad1.y) {
-			// if the Y button is pushed on gamepad1, decrease the position of
-			// the armServo servo.
-			armPosition -= armDelta;
-			setArmPosition(armPosition);
+			// if Y is pushed, decrease the position of the arm servo
+			adjustArmPosition(-ARM_DELTA);
 		}
-
-		if (gamepad1.left_bumper) {
-			colorSensor.enableLed(true);
-		} else {
-			colorSensor.enableLed(false);
-
-		}
-
-		// update the position of the bucketServo
 		if (gamepad1.x) {
-			bucketPosition += bucketDelta;
-			setBucketPosition(bucketPosition);
+			// if X is pushed, increase the position of the bucket servo
+			adjustBucketPosition(BUCKET_DELTA);
 		}
-
 		if (gamepad1.b) {
-			bucketPosition -= bucketDelta;
-			setBucketPosition(bucketPosition);
+			// if B is pushed, decrease the position of the bucket servo
+			adjustBucketPosition(-BUCKET_DELTA);
 		}
-
-		// write position values to the wrist and bucketServo servo
-		setArmPositionAndWait(armPosition,1000);
-		setBucketPosition(bucketPosition);
 	}
 
 	/*
@@ -139,16 +105,17 @@ public class FredTeleOp extends FredHardware {
 			index = 16;
 		}
 
-		// get value from the array.
-		double dScale = 0.0;
-		if (dVal < 0) {
-			dScale = -scaleArray[index];
-		} else {
-			dScale = scaleArray[index];
-		}
+		// get value from the array
+		double dScale = scaleArray[index];
+
+		// flip the sign if input was negative
+		if (dVal < 0) dScale = -dScale;
 
 		// return scaled value.
 		return dScale;
 	}
 
+	// amounts to change the armServo and bucket servo positions by
+	final static double ARM_DELTA = 0.001;
+	final static double BUCKET_DELTA = 0.002;
 }

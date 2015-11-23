@@ -19,15 +19,17 @@ public abstract class FredHardware extends OpMode {
      * Also, as the bucketServo servo approaches 0, the bucketServo opens up (drops the game element).
      */
 
-    // position of the servos.
-    double armPosition, bucketPosition;
-
-    // intended power to the wheels
-    float rPower, lPower;
+    // position of the servos & power to the wheels
+    private double armPosition;
+    private double bucketPosition;
+    private double lPower;
+    private double rPower;
 
     // hardware
-    DcMotor motorRight;
     DcMotor motorLeft;
+    DcMotor motorRight;
+    DcMotor newMotorLeft;
+    DcMotor newMotorRight;
     Servo bucketServo;
     Servo armServo;
     ColorSensor colorSensor;
@@ -35,7 +37,6 @@ public abstract class FredHardware extends OpMode {
 
     // hardware errors
     Map<String, String> hardwareErrors = new HashMap<String, String>();
-
 
     /*
      * Code to run when the op mode is first enabled goes here
@@ -70,6 +71,27 @@ public abstract class FredHardware extends OpMode {
             }
         } catch (Exception e) {
             hardwareErrors.put("error motorRight", e.getMessage());
+        }
+
+        try {
+            newMotorLeft = hardwareMap.dcMotor.get("newMotorLeft");
+            if (newMotorLeft == null) {
+                hardwareErrors.put("error newMotorLeft", "not found");
+            }
+
+        } catch (Exception e) {
+            hardwareErrors.put("error newMotorLeft", e.getMessage());
+        }
+
+        try {
+            newMotorRight = hardwareMap.dcMotor.get("newMotorRight");
+            if (newMotorRight == null) {
+                hardwareErrors.put("error newMotorRight", "not found");
+            } else {
+                newMotorRight.setDirection(DcMotor.Direction.REVERSE);
+            }
+        } catch (Exception e) {
+            hardwareErrors.put("error newMotorRight", e.getMessage());
         }
 
         try {
@@ -121,8 +143,8 @@ public abstract class FredHardware extends OpMode {
         }
 
         // try this
-        // DcMotorController motorController = hardwareMap.dcMotorController.get("motorController");
-        // motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
+        DcMotorController motorController = hardwareMap.dcMotorController.get("Motor Controller 1");
+        motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
     }
 
     /**
@@ -130,27 +152,19 @@ public abstract class FredHardware extends OpMode {
      */
     public abstract void innerLoop();
 
+    /*
+     * This method will be called repeatedly in a loop
+     *
+     * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#run()
+     */
     @Override
     public void loop() {
-        // perform the normal loop functions inside a try/catch to improve error handling
         try {
+            // perform the normal loop functions inside a try/catch to improve error handling
             innerLoop();
 
-            // Send telemetry data back to driver station. Note that if we are using
-		    // a legacy NXT-compatible motor controller, then the getPower() method
-		    // will return a null value. The legacy NXT-compatible motor controllers
-            // are currently write only.
-            telemetry.addData("color", "" + colorSensor.red() + "," + colorSensor.green() + "," + colorSensor.blue());
-            telemetry.addData("light", "" + lightSensor.getLightDetected());
-
-            // try to enable READ_WRITE above to add telemetry for motorLeft.getCurrentPosition()
-            telemetry.addData("motor-L", "pwr: " + String.format("%.2f", lPower));// + "," + motorLeft.getCurrentPosition());
-            telemetry.addData("motor-R", "pwr: " + String.format("%.2f", rPower));//+ "," + motorRight.getCurrentPosition());
-
-            telemetry.addData("armPosition.set", armPosition);
-            telemetry.addData("bucketPosition.set", bucketPosition);
-            telemetry.addData("armPosition.get", armServo.getPosition());
-            telemetry.addData("bucketPosition.get", bucketServo.getPosition());
+            // log the standard telemetry variables
+            updateTelemetry();
 
         } catch (RuntimeException e) {
             String message = e.getMessage();
@@ -168,246 +182,142 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
-     * Reset the left drive wheel encoder.
+     * send standard telemetry data back to driver station.  subclasses can override this to add
+     * their own telemetry
      */
-    public void reset_left_drive_encoder()
+    protected void updateTelemetry() {
+        telemetry.addData("color", "" + colorSensor.red() + "," + colorSensor.green() + "," + colorSensor.blue());
+        telemetry.addData("light", "" + lightSensor.getLightDetected());
 
-    {
-        if (motorLeft != null) {
-            motorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
-        }
+        telemetry.addData("motor-L", "pwr: " + String.format("pwr: %.2f pos: %d", lPower, leftEncoder()));
+        telemetry.addData("motor-R", "pwr: " + String.format("pwr: %.2f pos: %d", rPower, rightEncoder()));
 
-    }
-
-    /**
-     * Reset the right drive wheel encoder.
-     */
-    public void reset_right_drive_encoder()
-
-    {
-        if (motorRight != null) {
-            motorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
-        }
-
+        telemetry.addData("armPosition.set/get", String.format("%.2f,%.2f", armPosition, armServo.getPosition()));
+        telemetry.addData("bucketPosition.set/get", String.format("%.2f,%.2f", bucketPosition, bucketServo.getPosition()));
     }
 
     /**
      * Reset both drive wheel encoders.
      */
-    public void reset_drive_encoders()
-
-    {
-        //
-        // Reset the motor encoders on the drive wheels.
-        //
-        reset_left_drive_encoder();
-        reset_right_drive_encoder();
-
-    }
-
-    public void run_using_left_drive_encoder()
-    {
-        if (motorLeft != null) {
-            motorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        }
-
-    }
-
-    /**
-     * Set the right drive wheel encoder to run, if the mode is appropriate.
-     */
-    public void run_using_right_drive_encoder()
-    {
-        if (motorRight != null) {
-            motorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        }
-
-    }
-
-    /**
-     * Set both drive wheel encoders to run, if the mode is appropriate.
-     */
-    public void run_using_encoders()
-
-    {
+    public void resetDriveEncoders() {
         // perform the action on both motors.
-        run_using_left_drive_encoder();
-        run_using_right_drive_encoder();
+        if (newMotorLeft != null) {
+            newMotorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        }
+
+        if (newMotorRight != null) {
+            newMotorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        }
+    }
+
+    /**
+     * Set both drive wheel encoders to run
+     */
+    public void runUsingEncoders() {
+        // perform the action on both motors.
+        if (newMotorLeft != null) {
+            newMotorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        }
+
+        if (newMotorRight != null) {
+            newMotorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        }
 
     }
 
     /**
-     * Scale the joystick input using a nonlinear algorithm.
+     * set power to the left and right motors
      */
-    void set_drive_power(double p_left_power, double p_right_power)
-
-    {
-        if (motorLeft != null) {
-            motorLeft.setPower(p_left_power);
-        }
-        if (motorRight != null) {
-            motorRight.setPower(p_right_power);
-        }
-
-    } // set_drive_power
-
-    /**
-     * Indicate whether the right drive motor's encoder has reached a value.
-     */
-    boolean has_right_drive_encoder_reached(double p_count)
-
-    {
-        boolean success = false;
-
-        if (motorRight != null) {
-            //
-            // Have the encoders reached the specified values?
-            //
-            // TODO Implement stall code using these variables.
-            //
-            if (Math.abs(motorRight.getCurrentPosition()) > p_count) {
-                success = true;
-            }
-        }
-
-        return success;
-
-    }
-
-    /**
-     * Indicate whether the left drive motor's encoder has reached a value.
-     */
-    boolean has_left_drive_encoder_reached(double p_count)
-
-    {
-        boolean success = false;
-
-        if (motorLeft != null) {
-            //
-            // Has the encoder reached the specified values?
-            //
-            // TODO Implement stall code using these variables.
-            //
-            if (Math.abs(motorLeft.getCurrentPosition()) > p_count) {
-                success = true;
-            }
-        }
-
-        return success;
-
+    void setDrivePower(double left, double right) {
+        lPower = left;
+        rPower = right;
+        if (motorLeft != null) motorLeft.setPower(left);
+        if (motorRight != null) motorRight.setPower(right);
     }
 
     /**
      * Access the left encoder's count.
      */
     int leftEncoder() {
-        int value = 0;
-
-        if (motorLeft != null) {
-            value = motorLeft.getCurrentPosition();
+        int value;
+        try {
+            value = newMotorLeft.getCurrentPosition();
+        } catch (RuntimeException e) {
+            value = 0;
         }
-
         return value;
-
     }
 
     /**
      * Access the right encoder's count.
      */
-    int rightEncoder()
-
-    {
-        int value = 0;
-
-        if (motorRight != null) {
-            value = motorRight.getCurrentPosition();
+    int rightEncoder() {
+        int value;
+        try {
+            value = newMotorRight.getCurrentPosition();
+        } catch (RuntimeException e) {
+            value = 0;
         }
-
         return value;
-
     }
 
     /**
      * Indicate whether the drive motors' encoders have reached a value.
      */
-    boolean have_drive_encoders_reached(double leftCount, double rightCount) {
-
-        return has_left_drive_encoder_reached(leftCount) && has_right_drive_encoder_reached(rightCount);
-
-    }
-
-    /**
-     * Indicate whether the left drive encoder has been completely reset.
-     */
-    boolean has_left_drive_encoder_reset() {
-        boolean success = false; // assume failure
-
-        // Has the left encoder reached zero?
-        if (leftEncoder() == 0) {
-            success = true;
-        }
-
-        return success;
-
-    }
-
-    /**
-     * Indicate whether the left drive encoder has been completely reset.
-     */
-    boolean has_right_drive_encoder_reset() {
-        boolean success = false;  // Assume failure
-
-        // Has the right encoder reached zero?
-        if (rightEncoder() == 0) {
-            success = true;
-        }
-
-        return success;
-
+    boolean haveDriveEncodersReached(double leftCount, double rightCount) {
+        boolean leftSuccess = Math.abs(leftEncoder()) > leftCount;
+        boolean rightSuccess = Math.abs(rightEncoder()) > rightCount;
+        return leftSuccess && rightSuccess;
     }
 
     /**
      * Indicate whether the encoders have been completely reset.
      */
-    boolean have_drive_encoders_reset() {
-        return has_left_drive_encoder_reset() && has_right_drive_encoder_reset();
-
+    boolean haveDriveEncodersReset() {
+        // return true if both encoders are zero
+        return (leftEncoder() == 0) && (rightEncoder() == 0);
     }
 
-    final static double ARM_MIN_RANGE = 0.20;
-    final static double ARM_MAX_RANGE = 0.90;
 
+
+    /**
+     * sets the arm position to a specific value, after clipping to hardcoded ranges
+     * @param pos the desired position
+     */
     public void setArmPosition(double pos) {
         // clip the position values so that they never exceed their allowed range.
-        armPosition = Range.clip(pos, ARM_MIN_RANGE, ARM_MAX_RANGE);
+        armPosition = Range.clip(pos, ARM_MIN, ARM_MAX);
 
         // write position values to the wrist and bucketServo servo
         armServo.setPosition(armPosition);
     }
 
-    public void setArmPositionAndWait(double pos, int waitMS) {
-        long start = System.currentTimeMillis();
-        setArmPosition(pos);
-        while (System.currentTimeMillis() > start + waitMS) {
-            try {
-                Thread.sleep(waitMS / 10);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-            if (armServo.getPosition() == pos) {
-                break;
-            }
-        }
+    /**
+     * changes the arm position by the given amount, after clipping to hardcoded ranges
+     * @param delta amount to change by
+     */
+    public void adjustArmPosition(double delta) {
+        setArmPosition(armPosition+delta);
     }
-
-    final static double BUCKET_MIN_RANGE = 0.20;
-    final static double BUCKET_MAX_RANGE = 0.7;
 
     public void setBucketPosition(double pos) {
         // clip the position values so that they never exceed their allowed range.
-        bucketPosition = Range.clip(pos, BUCKET_MIN_RANGE, BUCKET_MAX_RANGE);
+        bucketPosition = Range.clip(pos, BUCKET_MIN, BUCKET_MAX);
 
         // write position values to the wrist and bucketServo servo
         bucketServo.setPosition(bucketPosition);
     }
+
+    /**
+     * changes the bucket position by the given amount, after clipping to hardcoded ranges
+     * @param delta amount to change by
+     */
+    public void adjustBucketPosition(double delta) {
+        setBucketPosition(bucketPosition + delta);
+    }
+
+    final static double ARM_MIN = 0.10;
+    final static double ARM_MAX = 0.90;
+    final static double BUCKET_MIN = 0.20;
+    final static double BUCKET_MAX = 0.99;
 }
