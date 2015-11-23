@@ -437,14 +437,6 @@ public abstract class FredHardware extends OpMode {
         }
     }
 
-    public void driveForTime (double lspeed, double rspeed, int waitMS) {
-        set_drive_power(lspeed, rspeed);
-        long start = System.currentTimeMillis();
-        if (System.currentTimeMillis() <= start + waitMS){
-            set_drive_power(0f, 0f);
-        }
-    }
-
     final static double BUCKET_MIN_RANGE = 0.20;
     final static double BUCKET_MAX_RANGE = 0.99;
 
