@@ -136,23 +136,12 @@ public abstract class FredHardware extends OpMode {
      */
     @Override
     public void loop() {
-        // perform the normal loop functions inside a try/catch to improve error handling
         try {
+            // perform the normal loop functions inside a try/catch to improve error handling
             innerLoop();
 
-            // Send telemetry data back to driver station. Note that if we are using
-		    // a legacy NXT-compatible motor controller, then the getPower() method
-		    // will return a null value. The legacy NXT-compatible motor controllers
-            // are currently write only.
-            telemetry.addData("color", "" + colorSensor.red() + "," + colorSensor.green() + "," + colorSensor.blue());
-            telemetry.addData("light", "" + lightSensor.getLightDetected());
-
-            // try to enable READ_WRITE above to add telemetry for motorLeft.getCurrentPosition()
-            telemetry.addData("motor-L", "pwr: " + String.format("%.2f", lPower));// + "," + motorLeft.getCurrentPosition());
-            telemetry.addData("motor-R", "pwr: " + String.format("%.2f", rPower));//+ "," + motorRight.getCurrentPosition());
-
-            telemetry.addData("armPosition.set/get", String.format("%.2f,%.2f", armPosition, armServo.getPosition()));
-            telemetry.addData("bucketPosition.set/get", String.format("%.2f,%.2f", bucketPosition, bucketServo.getPosition()));
+            // log the standard telemetry variables
+            updateTelemetry();
 
         } catch (RuntimeException e) {
             String message = e.getMessage();
@@ -170,12 +159,25 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
+     * send standard telemetry data back to driver station.  subclasses can override this to add
+     * their own telemetry
+     */
+    protected void updateTelemetry() {
+        telemetry.addData("color", "" + colorSensor.red() + "," + colorSensor.green() + "," + colorSensor.blue());
+        telemetry.addData("light", "" + lightSensor.getLightDetected());
+
+        telemetry.addData("motor-L", "pwr: " + String.format("pwr: %.2f pos: %d", lPower, leftEncoder()));
+        telemetry.addData("motor-R", "pwr: " + String.format("pwr: %.2f pos: %d", rPower, rightEncoder()));
+
+        telemetry.addData("armPosition.set/get", String.format("%.2f,%.2f", armPosition, armServo.getPosition()));
+        telemetry.addData("bucketPosition.set/get", String.format("%.2f,%.2f", bucketPosition, bucketServo.getPosition()));
+    }
+
+    /**
      * Reset both drive wheel encoders.
      */
     public void resetDriveEncoders() {
-        //
-        // Reset the motor encoders on the drive wheels.
-        //
+        // perform the action on both motors.
         if (motorLeft != null) {
             motorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
@@ -186,7 +188,7 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
-     * Set both drive wheel encoders to run, if the mode is appropriate.
+     * Set both drive wheel encoders to run
      */
     public void runUsingEncoders() {
         // perform the action on both motors.
@@ -214,12 +216,12 @@ public abstract class FredHardware extends OpMode {
      * Access the left encoder's count.
      */
     int leftEncoder() {
-        int value = 0;
-
-        if (motorLeft != null) {
+        int value;
+        try {
             value = motorLeft.getCurrentPosition();
+        } catch (RuntimeException e) {
+            value = 0;
         }
-
         return value;
     }
 
@@ -227,12 +229,12 @@ public abstract class FredHardware extends OpMode {
      * Access the right encoder's count.
      */
     int rightEncoder() {
-        int value = 0;
-
-        if (motorRight != null) {
+        int value;
+        try {
             value = motorRight.getCurrentPosition();
+        } catch (RuntimeException e) {
+            value = 0;
         }
-
         return value;
     }
 
@@ -241,7 +243,7 @@ public abstract class FredHardware extends OpMode {
      */
     boolean haveDriveEncodersReached(double leftCount, double rightCount) {
         boolean leftSuccess = Math.abs(leftEncoder()) > leftCount;
-        boolean rightSuccess = Math.abs(leftEncoder()) > rightCount;
+        boolean rightSuccess = Math.abs(rightEncoder()) > rightCount;
         return leftSuccess && rightSuccess;
     }
 
@@ -291,8 +293,8 @@ public abstract class FredHardware extends OpMode {
         setBucketPosition(bucketPosition + delta);
     }
 
-    final static double ARM_MIN = 0.20;
+    final static double ARM_MIN = 0.10;
     final static double ARM_MAX = 0.90;
     final static double BUCKET_MIN = 0.20;
-    final static double BUCKET_MAX = 0.7;
+    final static double BUCKET_MAX = 0.99;
 }
