@@ -201,12 +201,12 @@ public abstract class FredHardware extends OpMode {
      */
     public void resetDriveEncoders() {
         // perform the action on both motors.
-        if (motorLeft != null) {
-            motorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        if (newMotorLeft != null) {
+            newMotorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
 
-        if (motorRight != null) {
-            motorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        if (newMotorRight != null) {
+            newMotorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
     }
 
@@ -215,18 +215,18 @@ public abstract class FredHardware extends OpMode {
      */
     public void runUsingEncoders() {
         // perform the action on both motors.
-        if (motorLeft != null) {
-            motorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        if (newMotorLeft != null) {
+            newMotorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         }
 
-        if (motorRight != null) {
-            motorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        if (newMotorRight != null) {
+            newMotorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         }
 
     }
 
     /**
-     * Scale the joystick input using a nonlinear algorithm.
+     * set power to the left and right motors
      */
     void setDrivePower(double left, double right) {
         lPower = left;
