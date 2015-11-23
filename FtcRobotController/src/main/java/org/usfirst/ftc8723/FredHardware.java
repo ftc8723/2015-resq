@@ -28,6 +28,8 @@ public abstract class FredHardware extends OpMode {
     // hardware
     DcMotor motorLeft;
     DcMotor motorRight;
+    DcMotor newMotorLeft;
+    DcMotor newMotorRight;
     Servo bucketServo;
     Servo armServo;
     ColorSensor colorSensor;
@@ -69,6 +71,27 @@ public abstract class FredHardware extends OpMode {
             }
         } catch (Exception e) {
             hardwareErrors.put("error motorRight", e.getMessage());
+        }
+
+        try {
+            newMotorLeft = hardwareMap.dcMotor.get("newMotorLeft");
+            if (newMotorLeft == null) {
+                hardwareErrors.put("error newMotorLeft", "not found");
+            }
+
+        } catch (Exception e) {
+            hardwareErrors.put("error newMotorLeft", e.getMessage());
+        }
+
+        try {
+            newMotorRight = hardwareMap.dcMotor.get("newMotorRight");
+            if (newMotorRight == null) {
+                hardwareErrors.put("error newMotorRight", "not found");
+            } else {
+                newMotorRight.setDirection(DcMotor.Direction.REVERSE);
+            }
+        } catch (Exception e) {
+            hardwareErrors.put("error newMotorRight", e.getMessage());
         }
 
         try {
@@ -120,8 +143,8 @@ public abstract class FredHardware extends OpMode {
         }
 
         // try this
-        // DcMotorController motorController = hardwareMap.dcMotorController.get("motorController");
-        // motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
+        DcMotorController motorController = hardwareMap.dcMotorController.get("Motor Controller 1");
+        motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
     }
 
     /**
@@ -218,7 +241,7 @@ public abstract class FredHardware extends OpMode {
     int leftEncoder() {
         int value;
         try {
-            value = motorLeft.getCurrentPosition();
+            value = newMotorLeft.getCurrentPosition();
         } catch (RuntimeException e) {
             value = 0;
         }
@@ -231,7 +254,7 @@ public abstract class FredHardware extends OpMode {
     int rightEncoder() {
         int value;
         try {
-            value = motorRight.getCurrentPosition();
+            value = newMotorRight.getCurrentPosition();
         } catch (RuntimeException e) {
             value = 0;
         }
