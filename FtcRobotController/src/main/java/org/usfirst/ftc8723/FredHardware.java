@@ -193,16 +193,16 @@ public abstract class FredHardware extends OpMode {
      * their own telemetry
      */
     protected void updateTelemetry() {
-        telemetry.addData("colorSensor", String.format("rgb: %d,%d,%d", colorSensor.red(), colorSensor.green(), + colorSensor.blue()));
-        telemetry.addData("lightSensor", String.format("%.2f", lightSensor.getLightDetected()));
+        updateTelemetry("colorSensor", String.format("rgb: %d,%d,%d", colorSensor.red(), colorSensor.green(), +colorSensor.blue()));
+        updateTelemetry("lightSensor", String.format("%.2f", lightSensor.getLightDetected()));
 
-        telemetry.addData("motorLeft", String.format("pwr: %.2f pos: %d", lPower, leftEncoder()));
-        telemetry.addData("motorRight", String.format("pwr: %.2f pos: %d", rPower, rightEncoder()));
+        updateTelemetry("motorLeft", String.format("pwr: %.2f pos: %d", lPower, leftEncoder()));
+        updateTelemetry("motorRight", String.format("pwr: %.2f pos: %d", rPower, rightEncoder()));
 
-        telemetry.addData("armServo", String.format("%.2f", armPosition));
-        telemetry.addData("bucketServo", String.format("%.2f", bucketPosition));
+        updateTelemetry("armServo", String.format("%.2f", armPosition));
+        updateTelemetry("bucketServo", String.format("%.2f", bucketPosition));
 
-        telemetry.addData("gyroSensor", String.format("rotation: %.2f heading: %d", gyroRotation(), gyroHeading()));
+        updateTelemetry("gyroSensor", String.format("rotation: %.2f heading: %d", gyroRotation(), gyroHeading()));
     }
 
     private void updateTelemetry(String key, String value) {
