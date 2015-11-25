@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -34,6 +35,7 @@ public abstract class FredHardware extends OpMode {
     Servo armServo;
     ColorSensor colorSensor;
     LightSensor lightSensor;
+    GyroSensor gyroSensor;
 
     // hardware errors
     Map<String, String> hardwareErrors = new HashMap<String, String>();
@@ -55,92 +57,105 @@ public abstract class FredHardware extends OpMode {
         try {
             motorLeft = hardwareMap.dcMotor.get("motorLeft");
             if (motorLeft == null) {
-                hardwareErrors.put("error motorLeft", "not found");
+                hardwareErrors.put("motorLeft", "not found");
             }
 
         } catch (Exception e) {
-            hardwareErrors.put("error motorLeft", e.getMessage());
+            hardwareErrors.put("motorLeft", e.getMessage());
         }
 
         try {
             motorRight = hardwareMap.dcMotor.get("motorRight");
             if (motorRight == null) {
-                hardwareErrors.put("error motorRight", "not found");
+                hardwareErrors.put("motorRight", "not found");
             } else {
                 motorRight.setDirection(DcMotor.Direction.REVERSE);
             }
         } catch (Exception e) {
-            hardwareErrors.put("error motorRight", e.getMessage());
+            hardwareErrors.put("motorRight", e.getMessage());
         }
 
         try {
             newMotorLeft = hardwareMap.dcMotor.get("newMotorLeft");
             if (newMotorLeft == null) {
-                hardwareErrors.put("error newMotorLeft", "not found");
+                hardwareErrors.put("newMotorLeft", "not found");
             }
 
         } catch (Exception e) {
-            hardwareErrors.put("error newMotorLeft", e.getMessage());
+            hardwareErrors.put("newMotorLeft", e.getMessage());
         }
 
         try {
             newMotorRight = hardwareMap.dcMotor.get("newMotorRight");
             if (newMotorRight == null) {
-                hardwareErrors.put("error newMotorRight", "not found");
+                hardwareErrors.put("newMotorRight", "not found");
             } else {
                 newMotorRight.setDirection(DcMotor.Direction.REVERSE);
             }
         } catch (Exception e) {
-            hardwareErrors.put("error newMotorRight", e.getMessage());
+            hardwareErrors.put("newMotorRight", e.getMessage());
         }
 
         try {
-            // sensor 5
-            colorSensor = hardwareMap.colorSensor.get("color sensor");
-            if (colorSensor == null) {
-                hardwareErrors.put("error colorSensor", "not found");
-            }
-
-        } catch (Exception e) {
-            hardwareErrors.put("error colorSensor", e.getMessage());
-        }
-
-        try {
-            // sensor 4
-            lightSensor = hardwareMap.lightSensor.get("light sensor");
-            if (lightSensor == null) {
-                hardwareErrors.put("error lightSensor", "not found");
-            }
-
-        } catch (Exception e) {
-            hardwareErrors.put("error lightSensor", e.getMessage());
-        }
-
-        try {
-            // servo 1
-            armServo = hardwareMap.servo.get("arm servo");
-            if (armServo == null) {
-                hardwareErrors.put("error armServo", "not found");
-            } else {
-                armServo.setDirection(Servo.Direction.FORWARD);
-            }
-
-        } catch (Exception e) {
-            hardwareErrors.put("error armServo", e.getMessage());
-        }
-
-        try {
-            // servo 2
             bucketServo = hardwareMap.servo.get("bucket servo");
             if (bucketServo == null) {
-                hardwareErrors.put("error bucketServo", "not found");
+                hardwareErrors.put("bucketServo", "not found");
             } else {
                 bucketServo.setDirection(Servo.Direction.FORWARD);
             }
 
         } catch (Exception e) {
-            hardwareErrors.put("error bucketServo", e.getMessage());
+            hardwareErrors.put("bucketServo", e.getMessage());
         }
+
+        try {
+            armServo = hardwareMap.servo.get("arm servo");
+            if (armServo == null) {
+                hardwareErrors.put("armServo", "not found");
+            } else {
+                armServo.setDirection(Servo.Direction.FORWARD);
+            }
+
+        } catch (Exception e) {
+            hardwareErrors.put("armServo", e.getMessage());
+        }
+
+        try {
+            // legacy module port 5
+            colorSensor = hardwareMap.colorSensor.get("color sensor");
+            if (colorSensor == null) {
+                hardwareErrors.put("colorSensor", "not found");
+            }
+
+        } catch (Exception e) {
+            hardwareErrors.put("colorSensor", e.getMessage());
+        }
+
+        try {
+            // legacy module port 4
+            lightSensor = hardwareMap.lightSensor.get("light sensor");
+            if (lightSensor == null) {
+                hardwareErrors.put("lightSensor", "not found");
+            }
+
+        } catch (Exception e) {
+            hardwareErrors.put("lightSensor", e.getMessage());
+        }
+
+        try {
+            gyroSensor = hardwareMap.gyroSensor.get("gyro");
+            if (gyroSensor == null) {
+                hardwareErrors.put("gyroSensor", "not found");
+            } else {
+                // reset the gyro to zero
+                gyroSensor.calibrate();
+            }
+
+        } catch (Exception e) {
+            hardwareErrors.put("gyroSensor", e.getMessage());
+        }
+
+
 
         // try this
         DcMotorController motorController = hardwareMap.dcMotorController.get("Motor Controller 1");
@@ -171,14 +186,6 @@ public abstract class FredHardware extends OpMode {
             if (message == null) message = e.fillInStackTrace().toString();
             telemetry.addData("loopError", e.getClass().getSimpleName() + " - " + message);
         }
-
-        // todo - we may not need to do this every time... check to see if we add telemetry directly in init
-        for (Iterator<String> it = hardwareErrors.keySet().iterator(); it.hasNext(); ) {
-            String key = it.next();
-            String error = hardwareErrors.get(key);
-            telemetry.addData(key, error);
-        }
-
     }
 
     /**
@@ -186,14 +193,25 @@ public abstract class FredHardware extends OpMode {
      * their own telemetry
      */
     protected void updateTelemetry() {
-        telemetry.addData("color", "" + colorSensor.red() + "," + colorSensor.green() + "," + colorSensor.blue());
-        telemetry.addData("light", "" + lightSensor.getLightDetected());
+        updateTelemetry("colorSensor", String.format("rgb: %d,%d,%d", colorSensor.red(), colorSensor.green(), +colorSensor.blue()));
+        updateTelemetry("lightSensor", String.format("%.2f", lightSensor.getLightDetected()));
 
-        telemetry.addData("motor-L", "pwr: " + String.format("pwr: %.2f pos: %d", lPower, leftEncoder()));
-        telemetry.addData("motor-R", "pwr: " + String.format("pwr: %.2f pos: %d", rPower, rightEncoder()));
+        updateTelemetry("motorLeft", String.format("pwr: %.2f pos: %d", lPower, leftEncoder()));
+        updateTelemetry("motorRight", String.format("pwr: %.2f pos: %d", rPower, rightEncoder()));
 
-        telemetry.addData("armPosition.set/get", String.format("%.2f,%.2f", armPosition, armServo.getPosition()));
-        telemetry.addData("bucketPosition.set/get", String.format("%.2f,%.2f", bucketPosition, bucketServo.getPosition()));
+        updateTelemetry("armServo", String.format("%.2f", armPosition));
+        updateTelemetry("bucketServo", String.format("%.2f", bucketPosition));
+
+        updateTelemetry("gyroSensor", String.format("rotation: %.2f heading: %d", gyroRotation(), gyroHeading()));
+    }
+
+    private void updateTelemetry(String key, String value) {
+        String error = hardwareErrors.get(key);
+        if (error != null) {
+            telemetry.addData(key,error);
+        } else {
+            telemetry.addData(key,value);
+        }
     }
 
     /**
@@ -262,6 +280,31 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
+     * access the gyro's current rate of rotation
+     */
+    double gyroRotation() {
+        double value;
+        try {
+            value = gyroSensor.getRotation();
+        } catch (RuntimeException e) {
+            value = -1.0;
+        }
+        return value;
+    }
+
+    /**
+     * access the gyro's current heading (from initial)
+     */
+    int gyroHeading() {
+        int value;
+        try {
+            value = gyroSensor.getHeading();
+        } catch (RuntimeException e) {
+            value = -1;
+        }
+        return value;    }
+
+    /**
      * Indicate whether the drive motors' encoders have reached a value.
      */
     boolean haveDriveEncodersReached(double leftCount, double rightCount) {
@@ -277,8 +320,6 @@ public abstract class FredHardware extends OpMode {
         // return true if both encoders are zero
         return (leftEncoder() == 0) && (rightEncoder() == 0);
     }
-
-
 
     /**
      * sets the arm position to a specific value, after clipping to hardcoded ranges
@@ -300,6 +341,10 @@ public abstract class FredHardware extends OpMode {
         setArmPosition(armPosition+delta);
     }
 
+    /**
+     * sets the bucket position to a specific value, after clipping to hardcoded ranges
+     * @param pos the desired position
+     */
     public void setBucketPosition(double pos) {
         // clip the position values so that they never exceed their allowed range.
         bucketPosition = Range.clip(pos, BUCKET_MIN, BUCKET_MAX);
