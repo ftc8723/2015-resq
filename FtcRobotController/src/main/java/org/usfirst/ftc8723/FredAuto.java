@@ -5,6 +5,7 @@ public class FredAuto extends FredHardware {
 	// used in the loop() method to track which step of autonomous we are in and how long we have run
 	private int step = 0;
 	private long start = 0;
+	private long stepStart = 0;
 	private long runtime = 0;
 
 	/*
@@ -39,31 +40,31 @@ public class FredAuto extends FredHardware {
 			case 0:
 				start = System.currentTimeMillis();
 				resetDriveEncoders();
-				step++;
+				nextStep();
 				break;
 			case 1:
 				if (haveDriveEncodersReset()) {
 					runUsingEncoders();
-					setDrivePower(0.5f, 0.5f);
-					step++;
+					setDrivePower(0.1f, 0.1f);
+					nextStep();
 				}
 				break;
 			case 2:
-				if (haveDriveEncodersReached(1000, 1000)) { // todo change values
+				if (haveDriveEncodersReached(1440, 1440)) { // todo change values
 					resetDriveEncoders();
 					setArmPosition(0.1);
 					setBucketPosition(0.5);
 					setDrivePower(0.0f, 0.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 3:
-				if (haveDriveEncodersReset() && timeSinceStart() > 2000) {
+				if (haveDriveEncodersReset() && timeSince(stepStart) > 500) {
 					runUsingEncoders();
-					setDrivePower(-0.5f, 0.5f);
+					setDrivePower(-0.1f, 0.1f);
 					setArmPosition(0.5);
 					setBucketPosition(0.1);
-					step++;
+					nextStep();
 				}
 				break;
 			case 4:
@@ -72,7 +73,7 @@ public class FredAuto extends FredHardware {
 					setDrivePower(0.0f, 0.0f);
 					setArmPosition(0.2);
 					setBucketPosition(0.2);
-					step++;
+					nextStep();
 					step = STOP; // todo move this further down as we get things working
 				}
 				break;
@@ -80,28 +81,28 @@ public class FredAuto extends FredHardware {
 				if (haveDriveEncodersReset()) {
 					runUsingEncoders();
 					setDrivePower(1.0f, 1.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 6:
 				if (haveDriveEncodersReached(2880, 2880)) { // todo change values
 					resetDriveEncoders();
 					setDrivePower(0.0f, 0.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 7:
 				if (haveDriveEncodersReset()) {
 					runUsingEncoders();
 					setDrivePower(-0.5f, 0.5f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 8:
 				if (haveDriveEncodersReached(2880, 2880)) { // todo change values
 					resetDriveEncoders();
 					setDrivePower(0.0f, 0.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 9:
@@ -109,14 +110,14 @@ public class FredAuto extends FredHardware {
 					runUsingEncoders();
 					setDrivePower(1.0f, 1.0f);
 					setArmPosition(0.6);
-					step++;
+					nextStep();
 				}
 				break;
 			case 10:
 				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
 					resetDriveEncoders();
 					setDrivePower(0.0f, 0.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 11:
@@ -124,14 +125,14 @@ public class FredAuto extends FredHardware {
 					runUsingEncoders();
 					setDrivePower(-1.0f, -1.0f);
 					setBucketPosition(0.5);
-					step++;
+					nextStep();
 				}
 				break;
 			case 12:
 				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
 					resetDriveEncoders();
 					setDrivePower(0.0f, 0.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 13:
@@ -140,14 +141,14 @@ public class FredAuto extends FredHardware {
 					setDrivePower(0.5f, -0.5f);
 					setArmPosition(0.1);
 					setBucketPosition(0.5);
-					step++;
+					nextStep();
 				}
 				break;
 			case 14:
 				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
 					resetDriveEncoders();
 					setDrivePower(0.0f, 0.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 15:
@@ -155,55 +156,60 @@ public class FredAuto extends FredHardware {
 				if (haveDriveEncodersReset()) {
 					runUsingEncoders();
 					setDrivePower(-1.0f, -1.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 16:
 				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
 					resetDriveEncoders();
 					setDrivePower(0.0f, 0.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 17:
 				if (haveDriveEncodersReset()) {
 					runUsingEncoders();
 					setDrivePower(-0.5f, 0.5f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 18:
 				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
 					resetDriveEncoders();
 					setDrivePower(0.0f, 0.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 19:
 				if (haveDriveEncodersReset()) {
 					runUsingEncoders();
 					setDrivePower(1.0f, 1.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 20:
 				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
 					resetDriveEncoders();
 					setDrivePower(0.0f, 0.0f);
-					step++;
+					nextStep();
 				}
 				break;
 			case 21:
 				if (haveDriveEncodersReset()) {
-					step++;
+					nextStep();
 				}
 				break;
 			default:
 				// final state - autonomous actions have been accomplished
 				step = STOP;
-				if (runtime == 0) runtime = timeSinceStart();
+				if (runtime == 0) runtime = timeSince(start);
 				break;
 		}
+	}
+
+	private void nextStep() {
+		step++;
+		stepStart = System.currentTimeMillis();
 	}
 
 	@Override
@@ -213,13 +219,13 @@ public class FredAuto extends FredHardware {
 			telemetry.addData("Autonomous Complete ", String.format("%.2f sec", ((double)runtime)/1000));
 		} else {
 			telemetry.addData("Autonomous Step ", step);
-			telemetry.addData("Autonomous Time ", String.format("%.2f", ((double)timeSinceStart())/1000));
+			telemetry.addData("Autonomous Time ", String.format("%.2f", ((double) timeSince(start))/1000));
 		}
 	}
 
 	// return the current time minus the start time
-	private long timeSinceStart() {
-		return System.currentTimeMillis() - start;
+	private long timeSince(long timeSinceValue) {
+		return System.currentTimeMillis() - timeSinceValue;
 	}
 
 	// constant used for end of program
