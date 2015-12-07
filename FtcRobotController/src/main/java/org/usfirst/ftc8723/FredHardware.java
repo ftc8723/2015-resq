@@ -29,8 +29,7 @@ public abstract class FredHardware extends OpMode {
     // hardware
     DcMotor motorLeft;
     DcMotor motorRight;
-    DcMotor newMotorLeft;
-    DcMotor newMotorRight;
+    DcMotor armMotor;
     Servo bucketServo;
     Servo armServo;
     ColorSensor colorSensor;
@@ -76,39 +75,17 @@ public abstract class FredHardware extends OpMode {
         }
 
         try {
-            newMotorLeft = hardwareMap.dcMotor.get("newMotorLeft");
-            if (newMotorLeft == null) {
-                hardwareErrors.put("newMotorLeft", "not found");
+            armMotor = hardwareMap.dcMotor.get("armMotor");
+            if (motorLeft == null) {
+                hardwareErrors.put("armMotor", "not found");
             }
 
         } catch (Exception e) {
-            hardwareErrors.put("newMotorLeft", e.getMessage());
+            hardwareErrors.put("armMotor", e.getMessage());
         }
 
         try {
-            newMotorRight = hardwareMap.dcMotor.get("newMotorRight");
-            if (newMotorRight == null) {
-                hardwareErrors.put("newMotorRight", "not found");
-            } else {
-                newMotorRight.setDirection(DcMotor.Direction.REVERSE);
-            }
-        } catch (Exception e) {
-            hardwareErrors.put("newMotorRight", e.getMessage());
-        }
-
-        try {
-            bucketServo = hardwareMap.servo.get("bucket servo");
-            if (bucketServo == null) {
-                hardwareErrors.put("bucketServo", "not found");
-            } else {
-                bucketServo.setDirection(Servo.Direction.FORWARD);
-            }
-
-        } catch (Exception e) {
-            hardwareErrors.put("bucketServo", e.getMessage());
-        }
-
-        try {
+            // servo port 1
             armServo = hardwareMap.servo.get("arm servo");
             if (armServo == null) {
                 hardwareErrors.put("armServo", "not found");
@@ -118,6 +95,19 @@ public abstract class FredHardware extends OpMode {
 
         } catch (Exception e) {
             hardwareErrors.put("armServo", e.getMessage());
+        }
+
+        try {
+            // servo port 2
+            bucketServo = hardwareMap.servo.get("bucket servo");
+            if (bucketServo == null) {
+                hardwareErrors.put("bucketServo", "not found");
+            } else {
+                bucketServo.setDirection(Servo.Direction.FORWARD);
+            }
+
+        } catch (Exception e) {
+            hardwareErrors.put("bucketServo", e.getMessage());
         }
 
         try {
@@ -154,12 +144,6 @@ public abstract class FredHardware extends OpMode {
         } catch (Exception e) {
             hardwareErrors.put("gyroSensor", e.getMessage());
         }
-
-
-
-        // try this
-        DcMotorController motorController = hardwareMap.dcMotorController.get("Motor Controller 1");
-        motorController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_WRITE);
     }
 
     /**
@@ -219,12 +203,12 @@ public abstract class FredHardware extends OpMode {
      */
     public void resetDriveEncoders() {
         // perform the action on both motors.
-        if (newMotorLeft != null) {
-            newMotorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        if (motorLeft != null) {
+            motorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
 
-        if (newMotorRight != null) {
-            newMotorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        if (motorRight != null) {
+            motorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
     }
 
@@ -233,12 +217,12 @@ public abstract class FredHardware extends OpMode {
      */
     public void runUsingEncoders() {
         // perform the action on both motors.
-        if (newMotorLeft != null) {
-            newMotorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        if (motorLeft != null) {
+            motorLeft.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         }
 
-        if (newMotorRight != null) {
-            newMotorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        if (motorRight != null) {
+            motorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         }
 
     }
@@ -259,7 +243,7 @@ public abstract class FredHardware extends OpMode {
     int leftEncoder() {
         int value;
         try {
-            value = newMotorLeft.getCurrentPosition();
+            value = motorLeft.getCurrentPosition();
         } catch (RuntimeException e) {
             value = 0;
         }
@@ -272,7 +256,7 @@ public abstract class FredHardware extends OpMode {
     int rightEncoder() {
         int value;
         try {
-            value = newMotorRight.getCurrentPosition();
+            value = motorRight.getCurrentPosition();
         } catch (RuntimeException e) {
             value = 0;
         }

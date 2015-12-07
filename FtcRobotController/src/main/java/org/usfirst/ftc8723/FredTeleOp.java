@@ -18,9 +18,10 @@ public class FredTeleOp extends FredHardware {
 	public void init() {
 		super.init();
 
+		//  todo remove this or uncomment if we reconnect wrist and bucket servo
 		// assign the starting position of the wrist and bucketServo
-		setArmPosition(0.35);
-		setBucketPosition(1.0);
+		//setArmPosition(0.35);
+		//setBucketPosition(1.0);
 	}
 
 	/*
