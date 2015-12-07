@@ -4,7 +4,6 @@ public class FredAuto extends FredHardware {
 
 	// used in the loop() method to track which step of autonomous we are in and how long we have run
 	private int step = 0;
-	private long start = 0;
 	private long stepStart = 0;
 	private long runtime = 0;
 
@@ -38,25 +37,29 @@ public class FredAuto extends FredHardware {
 			// Synchronize the state machine and hardware.
 			//
 			case 0:
-				start = System.currentTimeMillis();
 				resetDriveEncoders();
 				nextStep();
 				break;
 			case 1:
-				if (haveDriveEncodersReset()) {
+				if (haveDriveEncodersReset() && !gyroSensor.isCalibrating()) {
 					runUsingEncoders();
-					setDrivePower(0.1f, 0.1f);
+					setDrivePower(0.2f, -0.2f); // turn left
 					nextStep();
 				}
 				break;
 			case 2:
-				if (haveDriveEncodersReached(1440, 1440)) { // todo change values
+				if (gyroHeading() >= 90) {
 					resetDriveEncoders();
-					setArmPosition(0.1);
-					setBucketPosition(0.5);
 					setDrivePower(0.0f, 0.0f);
-					nextStep();
+					step = STOP; // todo move this further down as we get things working
 				}
+//				if (haveDriveEncodersReached(1440, 1440)) { // todo change values
+//					resetDriveEncoders();
+//					setArmPosition(0.1);
+//					setBucketPosition(0.5);
+//					setDrivePower(0.0f, 0.0f);
+//					nextStep();
+//				}
 				break;
 			case 3:
 				if (haveDriveEncodersReset() && timeSince(stepStart) > 500) {
@@ -74,7 +77,6 @@ public class FredAuto extends FredHardware {
 					setArmPosition(0.2);
 					setBucketPosition(0.2);
 					nextStep();
-					step = STOP; // todo move this further down as we get things working
 				}
 				break;
 			case 5:

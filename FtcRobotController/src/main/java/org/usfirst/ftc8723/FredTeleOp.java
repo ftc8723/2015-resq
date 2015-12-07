@@ -12,16 +12,15 @@ public class FredTeleOp extends FredHardware {
 	/*
 	 * Code to run when the op mode is first enabled goes here
 	 *
-	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#start()
+	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#init()
 	 */
 	@Override
 	public void init() {
 		super.init();
 
-		//  todo remove this or uncomment if we reconnect wrist and bucket servo
 		// assign the starting position of the wrist and bucketServo
-		//setArmPosition(0.35);
-		//setBucketPosition(1.0);
+		setArmPosition(0.35);
+		setBucketPosition(1.0);
 	}
 
 	/*
@@ -73,17 +72,6 @@ public class FredTeleOp extends FredHardware {
 		}
 	}
 
-	/*
-	 * Code to run when the op mode is first disabled goes here
-	 * 
-	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#stop()
-	 */
-	@Override
-	public void stop() {
-
-	}
-
-    	
 	/*
 	 * This method scales the joystick input so for low joystick values, the 
 	 * scaled value is less than linear.  This is to make it easier to drive

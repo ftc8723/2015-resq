@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public abstract class FredHardware extends OpMode {
@@ -25,6 +24,9 @@ public abstract class FredHardware extends OpMode {
     private double bucketPosition;
     private double lPower;
     private double rPower;
+
+    // timer
+    long start;
 
     // hardware
     DcMotor motorLeft;
@@ -57,6 +59,8 @@ public abstract class FredHardware extends OpMode {
             motorLeft = hardwareMap.dcMotor.get("motorLeft");
             if (motorLeft == null) {
                 hardwareErrors.put("motorLeft", "not found");
+            } else {
+                motorLeft.setDirection(DcMotor.Direction.REVERSE);
             }
 
         } catch (Exception e) {
@@ -67,8 +71,6 @@ public abstract class FredHardware extends OpMode {
             motorRight = hardwareMap.dcMotor.get("motorRight");
             if (motorRight == null) {
                 hardwareErrors.put("motorRight", "not found");
-            } else {
-                motorRight.setDirection(DcMotor.Direction.REVERSE);
             }
         } catch (Exception e) {
             hardwareErrors.put("motorRight", e.getMessage());
@@ -137,14 +139,33 @@ public abstract class FredHardware extends OpMode {
             if (gyroSensor == null) {
                 hardwareErrors.put("gyroSensor", "not found");
             } else {
-                // reset the gyro to zero
-                gyroSensor.calibrate();
+                // start with the gyro rotation to zero
+                gyroCalibrate();
             }
 
         } catch (Exception e) {
             hardwareErrors.put("gyroSensor", e.getMessage());
         }
     }
+
+    /**
+     * Code to run when the op mode is first disabled goes here
+     *
+     * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#start()
+     */
+    @Override
+    public void start() {
+        start = System.currentTimeMillis();
+        long elapsed = 0;
+        while (gyroSensor.isCalibrating() && gyroHeading() != 0 && elapsed < 200) {
+            // wait up to 3 seconds to calibrate ... should NEVER take this long
+            elapsed = System.currentTimeMillis() - start;
+            if (elapsed > 3000) {
+                hardwareErrors.put("gyroSensor", "calibration timeout after " + elapsed + "ms");
+            }
+        }
+    }
+
 
     /**
      * FredAuto and FredTeleOp should override this to do the normal loop functions
@@ -173,6 +194,17 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
+     * Code to run when the op mode is first disabled goes here
+     *
+     * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#stop()
+     */
+    @Override
+    public void stop() {
+
+    }
+
+
+    /**
      * send standard telemetry data back to driver station.  subclasses can override this to add
      * their own telemetry
      */
@@ -186,15 +218,15 @@ public abstract class FredHardware extends OpMode {
         updateTelemetry("armServo", String.format("%.2f", armPosition));
         updateTelemetry("bucketServo", String.format("%.2f", bucketPosition));
 
-        updateTelemetry("gyroSensor", String.format("rotation: %.2f heading: %d", gyroRotation(), gyroHeading()));
+        updateTelemetry("gyroSensor", String.format("heading: %d", gyroHeading()));
     }
 
     private void updateTelemetry(String key, String value) {
         String error = hardwareErrors.get(key);
         if (error != null) {
-            telemetry.addData(key,error);
+            telemetry.addData(key, error);
         } else {
-            telemetry.addData(key,value);
+            telemetry.addData(key, value);
         }
     }
 
@@ -264,16 +296,15 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
-     * access the gyro's current rate of rotation
+     * reset the gyro heading to zero
      */
-    double gyroRotation() {
-        double value;
-        try {
-            value = gyroSensor.getRotation();
-        } catch (RuntimeException e) {
-            value = -1.0;
+    void gyroCalibrate() {
+        if (gyroSensor != null) try {
+            gyroSensor.calibrate();
+            hardwareErrors.remove("gyroSensor");
+        } catch (Exception e) {
+            hardwareErrors.put("gyroSensor", e.getMessage());
         }
-        return value;
     }
 
     /**
@@ -286,7 +317,15 @@ public abstract class FredHardware extends OpMode {
         } catch (RuntimeException e) {
             value = -1;
         }
-        return value;    }
+        return value;
+    }
+
+    /**
+     * @return the number of milliseconds since the start() method was called
+     */
+    long timeSinceStart() {
+        return System.currentTimeMillis() - start;
+    }
 
     /**
      * Indicate whether the drive motors' encoders have reached a value.
@@ -307,38 +346,52 @@ public abstract class FredHardware extends OpMode {
 
     /**
      * sets the arm position to a specific value, after clipping to hardcoded ranges
+     *
      * @param pos the desired position
      */
     public void setArmPosition(double pos) {
         // clip the position values so that they never exceed their allowed range.
         armPosition = Range.clip(pos, ARM_MIN, ARM_MAX);
 
-        // write position values to the wrist and bucketServo servo
-        armServo.setPosition(armPosition);
+        // write position values to the arm servo
+        try {
+            armServo.setPosition(armPosition);
+        } catch (Exception e) {
+            hardwareErrors.put("armServo", e.getMessage());
+        }
+
     }
 
     /**
      * changes the arm position by the given amount, after clipping to hardcoded ranges
+     *
      * @param delta amount to change by
      */
     public void adjustArmPosition(double delta) {
-        setArmPosition(armPosition+delta);
+        setArmPosition(armPosition + delta);
     }
 
     /**
      * sets the bucket position to a specific value, after clipping to hardcoded ranges
+     *
      * @param pos the desired position
      */
     public void setBucketPosition(double pos) {
         // clip the position values so that they never exceed their allowed range.
         bucketPosition = Range.clip(pos, BUCKET_MIN, BUCKET_MAX);
 
-        // write position values to the wrist and bucketServo servo
-        bucketServo.setPosition(bucketPosition);
+        // write position values to the bucketServo servo
+        try {
+            bucketServo.setPosition(bucketPosition);
+        } catch (Exception e) {
+            hardwareErrors.put("bucketServo", e.getMessage());
+        }
+
     }
 
     /**
      * changes the bucket position by the given amount, after clipping to hardcoded ranges
+     *
      * @param delta amount to change by
      */
     public void adjustBucketPosition(double delta) {
