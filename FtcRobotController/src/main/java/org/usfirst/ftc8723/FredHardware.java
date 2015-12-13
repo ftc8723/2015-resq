@@ -88,7 +88,7 @@ public abstract class FredHardware extends OpMode {
 
         try {
             // servo port 1
-            armServo = hardwareMap.servo.get("arm servo");
+            armServo = hardwareMap.servo.get("armServo");
             if (armServo == null) {
                 hardwareErrors.put("armServo", "not found");
             } else {
@@ -101,7 +101,7 @@ public abstract class FredHardware extends OpMode {
 
         try {
             // servo port 2
-            bucketServo = hardwareMap.servo.get("bucket servo");
+            bucketServo = hardwareMap.servo.get("bucketServo");
             if (bucketServo == null) {
                 hardwareErrors.put("bucketServo", "not found");
             } else {
@@ -114,7 +114,7 @@ public abstract class FredHardware extends OpMode {
 
         try {
             // legacy module port 5
-            colorSensor = hardwareMap.colorSensor.get("color sensor");
+            colorSensor = hardwareMap.colorSensor.get("colorSensor");
             if (colorSensor == null) {
                 hardwareErrors.put("colorSensor", "not found");
             }
@@ -125,7 +125,7 @@ public abstract class FredHardware extends OpMode {
 
         try {
             // legacy module port 4
-            lightSensor = hardwareMap.lightSensor.get("light sensor");
+            lightSensor = hardwareMap.lightSensor.get("lightSensor");
             if (lightSensor == null) {
                 hardwareErrors.put("lightSensor", "not found");
             }
@@ -215,10 +215,11 @@ public abstract class FredHardware extends OpMode {
         updateTelemetry("motorLeft", String.format("pwr: %.2f pos: %d", lPower, leftEncoder()));
         updateTelemetry("motorRight", String.format("pwr: %.2f pos: %d", rPower, rightEncoder()));
 
-        updateTelemetry("armServo", String.format("%.2f", armPosition));
-        updateTelemetry("bucketServo", String.format("%.2f", bucketPosition));
+        updateTelemetry("armServo", String.format("%.2f / %.2f", armPosition, armServo.getPosition()));
+        updateTelemetry("bucketServo", String.format("%.2f / %.2f", bucketPosition, bucketServo.getPosition()));
 
         updateTelemetry("gyroSensor", String.format("heading: %d", gyroHeading()));
+        updateTelemetry("hardwareErrors", hardwareErrors.toString());
     }
 
     private void updateTelemetry(String key, String value) {
@@ -349,7 +350,7 @@ public abstract class FredHardware extends OpMode {
      *
      * @param pos the desired position
      */
-    public void setArmPosition(double pos) {
+    public void setElbowPosition(double pos) {
         // clip the position values so that they never exceed their allowed range.
         armPosition = Range.clip(pos, ARM_MIN, ARM_MAX);
 
@@ -367,8 +368,12 @@ public abstract class FredHardware extends OpMode {
      *
      * @param delta amount to change by
      */
-    public void adjustArmPosition(double delta) {
-        setArmPosition(armPosition + delta);
+    public void adjustElbowPosition(double delta) {
+        setElbowPosition(armPosition + delta);
+    }
+
+    public void setArmMotorPower(double power){
+        armMotor.setPower(power);
     }
 
     /**

@@ -17,7 +17,7 @@ public class FredAuto extends FredHardware {
 		super.init();
 
 		// assign the starting position of the wrist and bucketServo
-		setArmPosition(0.2);
+		setElbowPosition(0.2);
 		setBucketPosition(0.2);
 	}
 
@@ -55,7 +55,7 @@ public class FredAuto extends FredHardware {
 				}
 //				if (haveDriveEncodersReached(1440, 1440)) { // todo change values
 //					resetDriveEncoders();
-//					setArmPosition(0.1);
+//					setElbowPosition(0.1);
 //					setBucketPosition(0.5);
 //					setDrivePower(0.0f, 0.0f);
 //					nextStep();
@@ -65,7 +65,7 @@ public class FredAuto extends FredHardware {
 				if (haveDriveEncodersReset() && timeSince(stepStart) > 500) {
 					runUsingEncoders();
 					setDrivePower(-0.1f, 0.1f);
-					setArmPosition(0.5);
+					setElbowPosition(0.5);
 					setBucketPosition(0.1);
 					nextStep();
 				}
@@ -74,7 +74,7 @@ public class FredAuto extends FredHardware {
 				if (haveDriveEncodersReached(1000, 1000)) { // todo change values
 					resetDriveEncoders();
 					setDrivePower(0.0f, 0.0f);
-					setArmPosition(0.2);
+					setElbowPosition(0.2);
 					setBucketPosition(0.2);
 					nextStep();
 				}
@@ -111,7 +111,7 @@ public class FredAuto extends FredHardware {
 				if (haveDriveEncodersReset()) {
 					runUsingEncoders();
 					setDrivePower(1.0f, 1.0f);
-					setArmPosition(0.6);
+					setElbowPosition(0.6);
 					nextStep();
 				}
 				break;
@@ -141,7 +141,7 @@ public class FredAuto extends FredHardware {
 				if (haveDriveEncodersReset()) {
 					runUsingEncoders();
 					setDrivePower(0.5f, -0.5f);
-					setArmPosition(0.1);
+					setElbowPosition(0.1);
 					setBucketPosition(0.5);
 					nextStep();
 				}

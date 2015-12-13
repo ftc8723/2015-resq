@@ -19,7 +19,7 @@ public class FredTeleOp extends FredHardware {
 		super.init();
 
 		// assign the starting position of the wrist and bucketServo
-		setArmPosition(0.35);
+		setElbowPosition(0.35);
 		setBucketPosition(1.0);
 	}
 
@@ -56,11 +56,11 @@ public class FredTeleOp extends FredHardware {
 		// check gamepad buttons and adjust servos accordingly
 		if (gamepad1.a) {
 			// if A is pushed, increase the position of the arm servo
-			adjustArmPosition(ARM_DELTA);
+			adjustElbowPosition(ARM_DELTA);
 		}
 		if (gamepad1.y) {
 			// if Y is pushed, decrease the position of the arm servo
-			adjustArmPosition(-ARM_DELTA);
+			adjustElbowPosition(-ARM_DELTA);
 		}
 		if (gamepad1.x) {
 			// if X is pushed, increase the position of the bucket servo
@@ -69,6 +69,15 @@ public class FredTeleOp extends FredHardware {
 		if (gamepad1.b) {
 			// if B is pushed, decrease the position of the bucket servo
 			adjustBucketPosition(-BUCKET_DELTA);
+		}
+		if (gamepad1.right_trigger > 0){
+			setArmMotorPower(gamepad1.right_trigger);
+		}
+		else if (gamepad1.left_trigger > 0){
+			setArmMotorPower(-gamepad1.left_trigger);
+		}
+		else {
+			setArmMotorPower(0f);
 		}
 	}
 
