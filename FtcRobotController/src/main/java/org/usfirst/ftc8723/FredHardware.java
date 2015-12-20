@@ -24,6 +24,7 @@ public abstract class FredHardware extends OpMode {
     private double bucketPosition;
     private double lPower;
     private double rPower;
+    private double armPower;
 
     // timer
     long start;
@@ -218,6 +219,8 @@ public abstract class FredHardware extends OpMode {
         updateTelemetry("armServo", String.format("%.2f / %.2f", armPosition, armServo.getPosition()));
         updateTelemetry("bucketServo", String.format("%.2f / %.2f", bucketPosition, bucketServo.getPosition()));
 
+        updateTelemetry("armPower", String.format("%.2f", armPower));
+
         updateTelemetry("gyroSensor", String.format("heading: %d", gyroHeading()));
         updateTelemetry("hardwareErrors", hardwareErrors.toString());
     }
@@ -372,8 +375,19 @@ public abstract class FredHardware extends OpMode {
         setElbowPosition(armPosition + delta);
     }
 
+    /**
+     * set the power of the arm motor
+     * divide by two to give more control
+     *
+     * @param power the desired power
+     */
     public void setArmMotorPower(double power){
-        armMotor.setPower(power);
+        armPower = power/2;
+        try {
+            armMotor.setPower(power);
+        } catch (Exception e) {
+            hardwareErrors.put("armMotorPower", e.getMessage());
+        }
     }
 
     /**
