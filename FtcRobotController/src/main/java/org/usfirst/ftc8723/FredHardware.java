@@ -382,7 +382,7 @@ public abstract class FredHardware extends OpMode {
      * @param power the desired power
      */
     public void setArmMotorPower(double power){
-        armPower = power/2;
+        armPower = power/8;
         try {
             armMotor.setPower(power);
         } catch (Exception e) {
@@ -417,8 +417,8 @@ public abstract class FredHardware extends OpMode {
         setBucketPosition(bucketPosition + delta);
     }
 
-    final static double ARM_MIN = 0.10;
-    final static double ARM_MAX = 0.90;
+    final static double ARM_MIN = 0.01;
+    final static double ARM_MAX = 0.75;
     final static double BUCKET_MIN = 0.20;
     final static double BUCKET_MAX = 0.99;
 }

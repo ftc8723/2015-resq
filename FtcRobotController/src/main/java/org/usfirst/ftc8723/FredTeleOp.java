@@ -19,7 +19,7 @@ public class FredTeleOp extends FredHardware {
 		super.init();
 
 		// assign the starting position of the wrist and bucketServo
-		setElbowPosition(0.35);
+		setElbowPosition(0.01);
 		setBucketPosition(1.0);
 	}
 
