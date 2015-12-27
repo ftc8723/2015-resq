@@ -71,10 +71,10 @@ public class FredTeleOp extends FredHardware {
 			adjustBucketPosition(-BUCKET_DELTA);
 		}
 		if (gamepad1.right_trigger > 0){
-			setArmMotorPower(gamepad1.right_trigger);
+			setArmMotorPower(0.1);
 		}
 		else if (gamepad1.left_trigger > 0){
-			setArmMotorPower(-gamepad1.left_trigger);
+			setArmMotorPower(-0.1);
 		}
 		else {
 			setArmMotorPower(0f);

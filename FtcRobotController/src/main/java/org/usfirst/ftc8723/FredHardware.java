@@ -56,6 +56,8 @@ public abstract class FredHardware extends OpMode {
 		 * configured your robot and created the configuration file.
 		 */
 
+        resetDriveEncoders();
+
         try {
             motorLeft = hardwareMap.dcMotor.get("motorLeft");
             if (motorLeft == null) {
@@ -220,6 +222,7 @@ public abstract class FredHardware extends OpMode {
         updateTelemetry("bucketServo", String.format("%.2f / %.2f", bucketPosition, bucketServo.getPosition()));
 
         updateTelemetry("armPower", String.format("%.2f", armPower));
+        updateTelemetry("armPos", String.format("%d", armEncoder()));
 
         updateTelemetry("gyroSensor", String.format("heading: %d", gyroHeading()));
         updateTelemetry("hardwareErrors", hardwareErrors.toString());
@@ -245,6 +248,10 @@ public abstract class FredHardware extends OpMode {
 
         if (motorRight != null) {
             motorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        }
+
+        if (armMotor != null) {
+            armMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
     }
 
@@ -293,6 +300,19 @@ public abstract class FredHardware extends OpMode {
         int value;
         try {
             value = motorRight.getCurrentPosition();
+        } catch (RuntimeException e) {
+            value = 0;
+        }
+        return value;
+    }
+
+    /**
+     * Access the arm encoder's count.
+     */
+    int armEncoder() {
+        int value;
+        try {
+            value = armMotor.getCurrentPosition();
         } catch (RuntimeException e) {
             value = 0;
         }
@@ -382,7 +402,7 @@ public abstract class FredHardware extends OpMode {
      * @param power the desired power
      */
     public void setArmMotorPower(double power){
-        armPower = power/8;
+        armPower = power;
         try {
             armMotor.setPower(power);
         } catch (Exception e) {
