@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.Range;
  * <p>
  * Enables control of the robot via the gamepad
  */
+
 public class FredTeleOp extends FredHardware {
 
 	/*
@@ -70,6 +71,19 @@ public class FredTeleOp extends FredHardware {
 			// if B is pushed, decrease the position of the bucket servo
 			adjustBucketPosition(-BUCKET_DELTA);
 		}
+		if (gamepad1.right_bumper && !rightBumperPressed){
+			// if we pressed the right bumper and it wasn't pressed last time around
+			shieldDirection = -shieldDirection;
+		}
+		rightBumperPressed = gamepad1.right_bumper;
+		if (gamepad1.right_bumper){
+			if (shieldDirection < 0) {
+				adjustShieldPosition(-SHIELD_DELTA);
+			}
+			else {
+				adjustShieldPosition(SHIELD_DELTA);
+			}
+		}
 		if (gamepad1.right_trigger > 0){
 			setArmMotorPower(0.1);
 		}
@@ -116,4 +130,8 @@ public class FredTeleOp extends FredHardware {
 	// amounts to change the armServo and bucket servo positions by
 	final static double ARM_DELTA = 0.001;
 	final static double BUCKET_DELTA = 0.002;
+	final static double SHIELD_DELTA = 0.002;
+	private int shieldDirection = -1;
+	private boolean rightBumperPressed = false;
+
 }

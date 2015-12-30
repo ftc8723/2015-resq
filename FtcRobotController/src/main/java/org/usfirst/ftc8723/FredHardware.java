@@ -22,6 +22,8 @@ public abstract class FredHardware extends OpMode {
     // position of the servos & power to the wheels
     private double armPosition;
     private double bucketPosition;
+    private double shieldPositionL;
+    private double shieldPositionR;
     private double lPower;
     private double rPower;
     private double armPower;
@@ -35,6 +37,8 @@ public abstract class FredHardware extends OpMode {
     DcMotor armMotor;
     Servo bucketServo;
     Servo armServo;
+    Servo shieldServoL;
+    Servo shieldServoR;
     ColorSensor colorSensor;
     LightSensor lightSensor;
     GyroSensor gyroSensor;
@@ -113,6 +117,32 @@ public abstract class FredHardware extends OpMode {
 
         } catch (Exception e) {
             hardwareErrors.put("bucketServo", e.getMessage());
+        }
+
+        try {
+            // servo port 3
+            shieldServoL = hardwareMap.servo.get("shieldServoL");
+            if (shieldServoL == null) {
+                hardwareErrors.put("shieldServoL", "not found");
+            } else {
+                shieldServoL.setDirection(Servo.Direction.FORWARD);
+            }
+
+        } catch (Exception e) {
+            hardwareErrors.put("shieldServoL", e.getMessage());
+        }
+
+        try {
+            // servo port 4
+            shieldServoR = hardwareMap.servo.get("shieldServoR");
+            if (shieldServoR == null) {
+                hardwareErrors.put("shieldServoR", "not found");
+            } else {
+                shieldServoR.setDirection(Servo.Direction.REVERSE);
+            }
+
+        } catch (Exception e) {
+            hardwareErrors.put("shieldServoR", e.getMessage());
         }
 
         try {
@@ -217,12 +247,12 @@ public abstract class FredHardware extends OpMode {
 
         updateTelemetry("motorLeft", String.format("pwr: %.2f pos: %d", lPower, leftEncoder()));
         updateTelemetry("motorRight", String.format("pwr: %.2f pos: %d", rPower, rightEncoder()));
+        updateTelemetry("armMotor", String.format("pwr: %.2f pos: %d", armPower, armEncoder()));
 
         updateTelemetry("armServo", String.format("%.2f / %.2f", armPosition, armServo.getPosition()));
         updateTelemetry("bucketServo", String.format("%.2f / %.2f", bucketPosition, bucketServo.getPosition()));
-
-        updateTelemetry("armPower", String.format("%.2f", armPower));
-        updateTelemetry("armPos", String.format("%d", armEncoder()));
+        updateTelemetry("shieldServoL", String.format("%.2f / %.2f", shieldPositionL, shieldServoL.getPosition()));
+        updateTelemetry("shieldServoR", String.format("%.2f / %.2f", shieldPositionR, shieldServoR.getPosition()));
 
         updateTelemetry("gyroSensor", String.format("heading: %d", gyroHeading()));
         updateTelemetry("hardwareErrors", hardwareErrors.toString());
@@ -437,8 +467,57 @@ public abstract class FredHardware extends OpMode {
         setBucketPosition(bucketPosition + delta);
     }
 
+    /**
+     * sets the bucket position to a specific value, after clipping to hardcoded ranges
+     *
+     * @param pos the desired position
+     */
+    public void setShieldPositionL(double pos) {
+        // clip the position values so that they never exceed their allowed range.
+        shieldPositionL = Range.clip(pos, SHIELDS_L_MIN, SHIELDS_L_MAX);
+
+        // write position values to the bucketServo servo
+        try {
+            shieldServoL.setPosition(shieldPositionL);
+        } catch (Exception e) {
+            hardwareErrors.put("shieldServoL", e.getMessage());
+        }
+    }
+
+    /**
+     * sets the bucket position to a specific value, after clipping to hardcoded ranges
+     *
+     * @param pos the desired position
+     */
+    public void setShieldPositionR(double pos) {
+
+        // clip the position values so that they never exceed their allowed range.
+        shieldPositionR = Range.clip(pos, SHIELDS_R_MIN, SHIELDS_R_MAX);
+
+        // write position values to the bucketServo servo
+        try {
+            shieldServoR.setPosition(shieldPositionR);
+        } catch (Exception e) {
+            hardwareErrors.put("shieldServoR", e.getMessage());
+        }
+    }
+
+    /**
+     * changes the bucket position by the given amount, after clipping to hardcoded ranges
+     *
+     * @param delta amount to change by
+     */
+    public void adjustShieldPosition(double delta){
+        setShieldPositionL(shieldPositionL + delta);
+        setShieldPositionR(shieldPositionR + delta);
+    }
+
     final static double ARM_MIN = 0.01;
     final static double ARM_MAX = 0.75;
     final static double BUCKET_MIN = 0.20;
     final static double BUCKET_MAX = 0.99;
+    final static double SHIELDS_L_MIN = 0.0;
+    final static double SHIELDS_L_MAX = 0.7;
+    final static double SHIELDS_R_MIN = 0.0;
+    final static double SHIELDS_R_MAX = 1.0;
 }
