@@ -15,18 +15,18 @@ import java.util.Map;
 public abstract class FredHardware extends OpMode {
     /*
      * Note: the configuration of the servos is such that
-     * as the armServo servo approaches 0, the armServo position moves up (away from the floor).
+     * as the elbowServo servo approaches 0, the elbowServo position moves up (away from the floor).
      * Also, as the bucketServo servo approaches 0, the bucketServo opens up (drops the game element).
      */
 
     // position of the servos & power to the wheels
-    private double armPosition;
+    private double elbowPosition;
     private double bucketPosition;
     private double shieldPositionL;
     private double shieldPositionR;
     private double lPower;
     private double rPower;
-    private double armPower;
+    private int armPosition;
 
     // timer
     long start;
@@ -36,7 +36,7 @@ public abstract class FredHardware extends OpMode {
     DcMotor motorRight;
     DcMotor armMotor;
     Servo bucketServo;
-    Servo armServo;
+    Servo elbowServo;
     Servo shieldServoL;
     Servo shieldServoR;
     ColorSensor colorSensor;
@@ -95,15 +95,15 @@ public abstract class FredHardware extends OpMode {
 
         try {
             // servo port 1
-            armServo = hardwareMap.servo.get("armServo");
-            if (armServo == null) {
-                hardwareErrors.put("armServo", "not found");
+            elbowServo = hardwareMap.servo.get("elbowServo");
+            if (elbowServo == null) {
+                hardwareErrors.put("elbowServo", "not found");
             } else {
-                armServo.setDirection(Servo.Direction.FORWARD);
+                elbowServo.setDirection(Servo.Direction.FORWARD);
             }
 
         } catch (Exception e) {
-            hardwareErrors.put("armServo", e.getMessage());
+            hardwareErrors.put("elbowServo", e.getMessage());
         }
 
         try {
@@ -247,9 +247,9 @@ public abstract class FredHardware extends OpMode {
 
         updateTelemetry("motorLeft", String.format("pwr: %.2f pos: %d", lPower, leftEncoder()));
         updateTelemetry("motorRight", String.format("pwr: %.2f pos: %d", rPower, rightEncoder()));
-        updateTelemetry("armMotor", String.format("pwr: %.2f pos: %d", armPower, armEncoder()));
+        updateTelemetry("armMotor", String.format("pos: %d / %d", armPosition, armEncoder()));
 
-        updateTelemetry("armServo", String.format("%.2f / %.2f", armPosition, armServo.getPosition()));
+        updateTelemetry("elbowServo", String.format("%.2f / %.2f", elbowPosition, elbowServo.getPosition()));
         updateTelemetry("bucketServo", String.format("%.2f / %.2f", bucketPosition, bucketServo.getPosition()));
         updateTelemetry("shieldServoL", String.format("%.2f / %.2f", shieldPositionL, shieldServoL.getPosition()));
         updateTelemetry("shieldServoR", String.format("%.2f / %.2f", shieldPositionR, shieldServoR.getPosition()));
@@ -297,7 +297,10 @@ public abstract class FredHardware extends OpMode {
         if (motorRight != null) {
             motorRight.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         }
-
+        if (armMotor != null) {
+            armMotor.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
+            armMotor.setPower(0.075);
+        }
     }
 
     /**
@@ -405,13 +408,13 @@ public abstract class FredHardware extends OpMode {
      */
     public void setElbowPosition(double pos) {
         // clip the position values so that they never exceed their allowed range.
-        armPosition = Range.clip(pos, ARM_MIN, ARM_MAX);
+        elbowPosition = Range.clip(pos, ELBOW_MIN, ELBOW_MAX);
 
         // write position values to the arm servo
         try {
-            armServo.setPosition(armPosition);
+            elbowServo.setPosition(elbowPosition);
         } catch (Exception e) {
-            hardwareErrors.put("armServo", e.getMessage());
+            hardwareErrors.put("elbowServo", e.getMessage());
         }
 
     }
@@ -422,22 +425,35 @@ public abstract class FredHardware extends OpMode {
      * @param delta amount to change by
      */
     public void adjustElbowPosition(double delta) {
-        setElbowPosition(armPosition + delta);
+        setElbowPosition(elbowPosition + delta);
+    }
+
+    public static int clip(int number, int min, int max) {
+        return number < min?min:(number > max?max:number);
     }
 
     /**
      * set the power of the arm motor
      * divide by two to give more control
      *
-     * @param power the desired power
+     * @param pos the desired position
      */
-    public void setArmMotorPower(double power){
-        armPower = power;
+    public void setArmMotorPosition(int pos){
+        armPosition = clip(pos, ARM_MIN, ARM_MAX);
         try {
-            armMotor.setPower(power);
+            armMotor.setTargetPosition(pos);
         } catch (Exception e) {
-            hardwareErrors.put("armMotorPower", e.getMessage());
+            hardwareErrors.put("armMotor", e.getMessage());
         }
+    }
+
+    /**
+     * changes the arm position by the given amount, after clipping to hardcoded ranges
+     *
+     * @param delta amount to change by
+     */
+    public void adjustArmPosition(int delta) {
+        setArmMotorPosition(armPosition + delta);
     }
 
     /**
@@ -512,12 +528,14 @@ public abstract class FredHardware extends OpMode {
         setShieldPositionR(shieldPositionR + delta);
     }
 
-    final static double ARM_MIN = 0.01;
-    final static double ARM_MAX = 0.75;
+    final static double ELBOW_MIN = 0.01;
+    final static double ELBOW_MAX = 0.6;
     final static double BUCKET_MIN = 0.20;
     final static double BUCKET_MAX = 0.99;
     final static double SHIELDS_L_MIN = 0.0;
     final static double SHIELDS_L_MAX = 0.7;
     final static double SHIELDS_R_MIN = 0.0;
     final static double SHIELDS_R_MAX = 1.0;
+    final static int ARM_MIN = 10;
+    final static int ARM_MAX = 750;
 }
