@@ -41,50 +41,46 @@ public class FredAuto extends FredHardware {
 				nextStep();
 				break;
 			case 1:
+				// drive forward
 				if (haveDriveEncodersReset() && !gyroSensor.isCalibrating()) {
 					runUsingEncoders();
-					setDrivePower(0.2f, -0.2f); // turn left
+					setDrivePower(0.4f, 0.4f);
 					nextStep();
 				}
 				break;
 			case 2:
-				if (gyroHeading() >= 90) {
-					resetDriveEncoders();
+				if (haveDriveEncodersReached(7250, 7250)) {
 					setDrivePower(0.0f, 0.0f);
-					step = STOP; // todo move this further down as we get things working
+					resetDriveEncoders();
+					gyroCalibrate();
+					//setElbowPosition(0.1);
+					//setBucketPosition(0.5);
+					nextStep();
 				}
-//				if (haveDriveEncodersReached(1440, 1440)) { // todo change values
-//					resetDriveEncoders();
-//					setElbowPosition(0.1);
-//					setBucketPosition(0.5);
-//					setDrivePower(0.0f, 0.0f);
-//					nextStep();
-//				}
 				break;
 			case 3:
-				if (haveDriveEncodersReset() && timeSince(stepStart) > 500) {
+				if (haveDriveEncodersReset() && timeSince(stepStart) > 5 && !gyroSensor.isCalibrating()) {
 					runUsingEncoders();
 					setDrivePower(-0.1f, 0.1f);
-					setElbowPosition(0.5);
-					setBucketPosition(0.1);
+					//setElbowPosition(0.5);
+					//setBucketPosition(0.1);
 					nextStep();
 				}
 				break;
 			case 4:
-				if (haveDriveEncodersReached(1000, 1000)) { // todo change values
-					resetDriveEncoders();
+				// stop at 225 degrees heading (but don't get tricked by 0 or 1
+				if (gyroHeading() <= 226 && gyroHeading() >= 10) {
 					setDrivePower(0.0f, 0.0f);
-					setElbowPosition(0.2);
-					setBucketPosition(0.2);
-					nextStep();
+					resetDriveEncoders();
+					nextStep(); // todo move this further down as we get things working
 				}
 				break;
 			case 5:
 				if (haveDriveEncodersReset()) {
 					runUsingEncoders();
-					setDrivePower(1.0f, 1.0f);
 					nextStep();
 				}
+				step = STOP;
 				break;
 			case 6:
 				if (haveDriveEncodersReached(2880, 2880)) { // todo change values
