@@ -34,7 +34,7 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegister;
 
-import org.usfirst.ftc8723.FredAuto;
+import org.usfirst.ftc8723.FredAutoRampRed;
 import org.usfirst.ftc8723.FredTeleOp;
 
 /**
@@ -59,7 +59,7 @@ public class FtcOpModeRegister implements OpModeRegister {
      */
 
     manager.register("FredTeleOp", FredTeleOp.class);
-    manager.register("FredAuto", FredAuto.class);
+    manager.register("FredAutoRampRed", FredAutoRampRed.class);
 
     manager.register("NullOp", NullOp.class);
 

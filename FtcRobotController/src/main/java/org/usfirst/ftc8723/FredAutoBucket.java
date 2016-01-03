@@ -1,6 +1,6 @@
 package org.usfirst.ftc8723;
 
-public class FredAuto extends FredHardware {
+public class FredAutoBucket extends FredHardware {
 
 	// used in the loop() method to track which step of autonomous we are in and how long we have run
 	private int step = 0;
@@ -108,16 +108,6 @@ public class FredAuto extends FredHardware {
 	// return the current time minus the start time
 	private long timeSince(long timeSinceValue) {
 		return System.currentTimeMillis() - timeSinceValue;
-	}
-
-	private void stopAndReset(){
-		setDrivePower(0.0f, 0.0f);
-		resetDriveEncoders();
-		gyroCalibrate();
-	}
-
-	private boolean resetCompleted(){
-		return haveDriveEncodersReset() && !gyroSensor.isCalibrating();
 	}
 
 	// constant used for end of program

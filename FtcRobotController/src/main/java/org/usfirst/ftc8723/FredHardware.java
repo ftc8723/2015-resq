@@ -1,12 +1,15 @@
 package org.usfirst.ftc8723;
 
+import com.qualcomm.hardware.ModernRoboticsUsbLegacyModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.LegacyModule;
 import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.Range;
 
 import java.util.HashMap;
@@ -42,6 +45,7 @@ public abstract class FredHardware extends OpMode {
     ColorSensor colorSensor;
     LightSensor lightSensor;
     GyroSensor gyroSensor;
+    UltrasonicSensor ultraSensor;
 
     // hardware errors
     Map<String, String> hardwareErrors = new HashMap<String, String>();
@@ -179,6 +183,20 @@ public abstract class FredHardware extends OpMode {
         } catch (Exception e) {
             hardwareErrors.put("gyroSensor", e.getMessage());
         }
+
+        try {
+            ultraSensor = hardwareMap.ultrasonicSensor.get("ultraSensor");
+            if (ultraSensor == null) {
+                hardwareErrors.put("ultraSensor", "not found");
+            }
+            else {
+                LegacyModule legacyModule = hardwareMap.legacyModule.get("legacy");
+                legacyModule.enable9v(ULTRASONIC_PORT, true);
+            }
+
+        } catch (Exception e) {
+            hardwareErrors.put("ultraSensor", e.getMessage());
+        }
     }
 
     /**
@@ -201,7 +219,7 @@ public abstract class FredHardware extends OpMode {
 
 
     /**
-     * FredAuto and FredTeleOp should override this to do the normal loop functions
+     * FredAutoRampRed and FredTeleOp should override this to do the normal loop functions
      */
     public abstract void innerLoop();
 
@@ -242,8 +260,10 @@ public abstract class FredHardware extends OpMode {
      * their own telemetry
      */
     protected void updateTelemetry() {
+        updateTelemetry("hardwareErrors", hardwareErrors.toString());
         updateTelemetry("colorSensor", String.format("rgb: %d,%d,%d", colorSensor.red(), colorSensor.green(), +colorSensor.blue()));
         updateTelemetry("lightSensor", String.format("%.2f", lightSensor.getLightDetected()));
+        updateTelemetry("ultraSensor", String.format("%.2f", getUltrasonicLevel()));
 
         updateTelemetry("motorLeft", String.format("pwr: %.2f pos: %d", lPower, getEncoder(motorLeft)));
         updateTelemetry("motorRight", String.format("pwr: %.2f pos: %d", rPower, getEncoder(motorRight)));
@@ -255,7 +275,6 @@ public abstract class FredHardware extends OpMode {
         updateTelemetry("shieldServoR", String.format("%.2f / %.2f", shieldPositionR, getPosition(shieldServoR)));
 
         updateTelemetry("gyroSensor", String.format("heading: %d", gyroHeading()));
-        updateTelemetry("hardwareErrors", hardwareErrors.toString());
     }
 
     private void updateTelemetry(String key, String value) {
@@ -327,6 +346,21 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
+     * @return the ultrasonic level, or -1 if the sensor does not exist or an error occurs
+     */
+    private double getUltrasonicLevel() {
+        double value;
+        try {
+            value = ultraSensor.getUltrasonicLevel();
+        } catch (RuntimeException e) {
+            value = -1;
+        }
+        return value;
+    }
+
+
+
+    /**
      * @return the encoder count, or 0 if the motor doesn't exist or an error occurs
      */
     double getPosition(Servo servo) {
@@ -386,6 +420,16 @@ public abstract class FredHardware extends OpMode {
     boolean haveDriveEncodersReset() {
         // return true if both encoders are zero
         return (getEncoder(motorLeft) == 0) && (getEncoder(motorRight) == 0);
+    }
+
+    void stopAndReset(){
+        setDrivePower(0.0f, 0.0f);
+        resetDriveEncoders();
+        gyroCalibrate();
+    }
+
+    boolean resetCompleted(){
+        return haveDriveEncodersReset() && !gyroSensor.isCalibrating();
     }
 
     /**
@@ -525,4 +569,6 @@ public abstract class FredHardware extends OpMode {
     final static double SHIELDS_R_MAX = 1.0;
     final static int ARM_MIN = 10;
     final static int ARM_MAX = 750;
+    final static int ULTRASONIC_PORT = 4;
+
 }

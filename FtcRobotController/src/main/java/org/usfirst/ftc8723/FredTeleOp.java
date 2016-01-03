@@ -100,6 +100,9 @@ public class FredTeleOp extends FredHardware {
 		else {
 			adjustArmPosition(0);
 		}
+		if (gamepad1.left_bumper && gamepad1.right_bumper){
+			stopAndReset();
+		}
 	}
 
 	/*
