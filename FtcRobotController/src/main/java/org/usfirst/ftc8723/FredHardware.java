@@ -190,7 +190,7 @@ public abstract class FredHardware extends OpMode {
                 hardwareErrors.put("ultraSensor", "not found");
             }
             else {
-                LegacyModule legacyModule = hardwareMap.legacyModule.get("legacy");
+                LegacyModule legacyModule = hardwareMap.legacyModule.get("legacyModule");
                 legacyModule.enable9v(ULTRASONIC_PORT, true);
             }
 
@@ -560,11 +560,11 @@ public abstract class FredHardware extends OpMode {
     }
 
     final static double ELBOW_MIN = 0.01;
-    final static double ELBOW_MAX = 0.6;
+    final static double ELBOW_MAX = 1.0;
     final static double BUCKET_MIN = 0.20;
     final static double BUCKET_MAX = 0.99;
-    final static double SHIELDS_L_MIN = 0.0;
-    final static double SHIELDS_L_MAX = 0.7;
+    final static double SHIELDS_L_MIN = 0.6;
+    final static double SHIELDS_L_MAX = 1.0;
     final static double SHIELDS_R_MIN = 0.0;
     final static double SHIELDS_R_MAX = 1.0;
     final static int ARM_MIN = 10;

@@ -20,10 +20,10 @@ public class FredTeleOp extends FredHardware {
 		super.init();
 
 		// assign the starting position of the wrist and bucketServo
-		setElbowPosition(0.01);
+		setElbowPosition(0.5);
 		setBucketPosition(1.0);
-		setShieldPositionR(1.0);
-		setShieldPositionL(1.0);
+		setShieldPositionR(0.8);
+		setShieldPositionL(0.6);
 	}
 
 	public void start() {
@@ -78,18 +78,11 @@ public class FredTeleOp extends FredHardware {
 			// if B is pushed, decrease the position of the bucket servo
 			adjustBucketPosition(-BUCKET_DELTA);
 		}
-		if (gamepad1.right_bumper && !rightBumperPressed){
-			// if we pressed the right bumper and it wasn't pressed last time around
-			shieldDirection = -shieldDirection;
+		if (gamepad1.dpad_up) {
+			adjustShieldPosition(SHIELD_DELTA);
 		}
-		rightBumperPressed = gamepad1.right_bumper;
-		if (gamepad1.right_bumper){
-			if (shieldDirection < 0) {
-				adjustShieldPosition(-SHIELD_DELTA);
-			}
-			else {
-				adjustShieldPosition(SHIELD_DELTA);
-			}
+		if (gamepad1.dpad_down) {
+			adjustShieldPosition(-SHIELD_DELTA);
 		}
 		if (gamepad1.right_trigger > 0) {
 			adjustArmPosition(ARM_DELTA);
@@ -143,6 +136,5 @@ public class FredTeleOp extends FredHardware {
 	final static double SHIELD_DELTA = 0.002;
 	final static int ARM_DELTA = 4;
 	private int shieldDirection = -1;
-	private boolean rightBumperPressed = false;
 
 }
