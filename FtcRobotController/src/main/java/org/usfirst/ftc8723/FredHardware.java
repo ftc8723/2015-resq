@@ -245,14 +245,14 @@ public abstract class FredHardware extends OpMode {
         updateTelemetry("colorSensor", String.format("rgb: %d,%d,%d", colorSensor.red(), colorSensor.green(), +colorSensor.blue()));
         updateTelemetry("lightSensor", String.format("%.2f", lightSensor.getLightDetected()));
 
-        updateTelemetry("motorLeft", String.format("pwr: %.2f pos: %d", lPower, leftEncoder()));
-        updateTelemetry("motorRight", String.format("pwr: %.2f pos: %d", rPower, rightEncoder()));
-        updateTelemetry("armMotor", String.format("pos: %d / %d", armPosition, armEncoder()));
+        updateTelemetry("motorLeft", String.format("pwr: %.2f pos: %d", lPower, getEncoder(motorLeft)));
+        updateTelemetry("motorRight", String.format("pwr: %.2f pos: %d", rPower, getEncoder(motorRight)));
+        updateTelemetry("armMotor", String.format("pos: %d / %d", armPosition, getEncoder(armMotor)));
 
-        updateTelemetry("elbowServo", String.format("%.2f / %.2f", elbowPosition, elbowServo.getPosition()));
-        updateTelemetry("bucketServo", String.format("%.2f / %.2f", bucketPosition, bucketServo.getPosition()));
-        updateTelemetry("shieldServoL", String.format("%.2f / %.2f", shieldPositionL, shieldServoL.getPosition()));
-        updateTelemetry("shieldServoR", String.format("%.2f / %.2f", shieldPositionR, shieldServoR.getPosition()));
+        updateTelemetry("elbowServo", String.format("%.2f / %.2f", elbowPosition, getPosition(elbowServo)));
+        updateTelemetry("bucketServo", String.format("%.2f / %.2f", bucketPosition, getPosition(bucketServo)));
+        updateTelemetry("shieldServoL", String.format("%.2f / %.2f", shieldPositionL, getPosition(shieldServoL)));
+        updateTelemetry("shieldServoR", String.format("%.2f / %.2f", shieldPositionR, getPosition(shieldServoR)));
 
         updateTelemetry("gyroSensor", String.format("heading: %d", gyroHeading()));
         updateTelemetry("hardwareErrors", hardwareErrors.toString());
@@ -314,12 +314,12 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
-     * Access the left encoder's count.
+     * @return the encoder count, or 0 if the motor doesn't exist or an error occurs
      */
-    int leftEncoder() {
+    int getEncoder(DcMotor motor) {
         int value;
         try {
-            value = motorLeft.getCurrentPosition();
+            value = motor.getCurrentPosition();
         } catch (RuntimeException e) {
             value = 0;
         }
@@ -327,25 +327,12 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
-     * Access the right encoder's count.
+     * @return the encoder count, or 0 if the motor doesn't exist or an error occurs
      */
-    int rightEncoder() {
-        int value;
+    double getPosition(Servo servo) {
+        double value;
         try {
-            value = motorRight.getCurrentPosition();
-        } catch (RuntimeException e) {
-            value = 0;
-        }
-        return value;
-    }
-
-    /**
-     * Access the arm encoder's count.
-     */
-    int armEncoder() {
-        int value;
-        try {
-            value = armMotor.getCurrentPosition();
+            value = servo.getPosition();
         } catch (RuntimeException e) {
             value = 0;
         }
@@ -388,8 +375,8 @@ public abstract class FredHardware extends OpMode {
      * Indicate whether the drive motors' encoders have reached a value.
      */
     boolean haveDriveEncodersReached(double leftCount, double rightCount) {
-        boolean leftSuccess = Math.abs(leftEncoder()) > leftCount;
-        boolean rightSuccess = Math.abs(rightEncoder()) > rightCount;
+        boolean leftSuccess = Math.abs(getEncoder(motorLeft)) > leftCount;
+        boolean rightSuccess = Math.abs(getEncoder(motorRight)) > rightCount;
         return leftSuccess && rightSuccess;
     }
 
@@ -398,7 +385,7 @@ public abstract class FredHardware extends OpMode {
      */
     boolean haveDriveEncodersReset() {
         // return true if both encoders are zero
-        return (leftEncoder() == 0) && (rightEncoder() == 0);
+        return (getEncoder(motorLeft) == 0) && (getEncoder(motorRight) == 0);
     }
 
     /**
