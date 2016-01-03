@@ -37,12 +37,12 @@ public class FredAuto extends FredHardware {
 			// Synchronize the state machine and hardware.
 			//
 			case 0:
-				resetDriveEncoders();
+				stopAndReset();
 				nextStep();
 				break;
 			case 1:
 				// drive forward
-				if (haveDriveEncodersReset() && !gyroSensor.isCalibrating()) {
+				if (resetCompleted()) {
 					runUsingEncoders();
 					setDrivePower(0.4f, 0.4f);
 					nextStep();
@@ -50,150 +50,34 @@ public class FredAuto extends FredHardware {
 				break;
 			case 2:
 				if (haveDriveEncodersReached(7250, 7250)) {
-					setDrivePower(0.0f, 0.0f);
-					resetDriveEncoders();
-					gyroCalibrate();
-					//setElbowPosition(0.1);
-					//setBucketPosition(0.5);
+					stopAndReset();
 					nextStep();
 				}
 				break;
 			case 3:
-				if (haveDriveEncodersReset() && timeSince(stepStart) > 5 && !gyroSensor.isCalibrating()) {
+				if (resetCompleted()) {
 					runUsingEncoders();
-					setDrivePower(-0.1f, 0.1f);
-					//setElbowPosition(0.5);
-					//setBucketPosition(0.1);
+					setDrivePower(-0.2f, 0.2f);
 					nextStep();
 				}
 				break;
 			case 4:
 				// stop at 225 degrees heading (but don't get tricked by 0 or 1
 				if (gyroHeading() <= 226 && gyroHeading() >= 10) {
-					setDrivePower(0.0f, 0.0f);
-					resetDriveEncoders();
+					stopAndReset();
 					nextStep(); // todo move this further down as we get things working
 				}
 				break;
 			case 5:
-				if (haveDriveEncodersReset()) {
+				if (resetCompleted()) {
 					runUsingEncoders();
+					setDrivePower(0.4f, 0.4f);
 					nextStep();
 				}
-				step = STOP;
 				break;
 			case 6:
-				if (haveDriveEncodersReached(2880, 2880)) { // todo change values
-					resetDriveEncoders();
-					setDrivePower(0.0f, 0.0f);
-					nextStep();
-				}
-				break;
-			case 7:
-				if (haveDriveEncodersReset()) {
-					runUsingEncoders();
-					setDrivePower(-0.5f, 0.5f);
-					nextStep();
-				}
-				break;
-			case 8:
-				if (haveDriveEncodersReached(2880, 2880)) { // todo change values
-					resetDriveEncoders();
-					setDrivePower(0.0f, 0.0f);
-					nextStep();
-				}
-				break;
-			case 9:
-				if (haveDriveEncodersReset()) {
-					runUsingEncoders();
-					setDrivePower(1.0f, 1.0f);
-					setElbowPosition(0.6);
-					nextStep();
-				}
-				break;
-			case 10:
-				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
-					resetDriveEncoders();
-					setDrivePower(0.0f, 0.0f);
-					nextStep();
-				}
-				break;
-			case 11:
-				if (haveDriveEncodersReset()) {
-					runUsingEncoders();
-					setDrivePower(-1.0f, -1.0f);
-					setBucketPosition(0.5);
-					nextStep();
-				}
-				break;
-			case 12:
-				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
-					resetDriveEncoders();
-					setDrivePower(0.0f, 0.0f);
-					nextStep();
-				}
-				break;
-			case 13:
-				if (haveDriveEncodersReset()) {
-					runUsingEncoders();
-					setDrivePower(0.5f, -0.5f);
-					setElbowPosition(0.1);
-					setBucketPosition(0.5);
-					nextStep();
-				}
-				break;
-			case 14:
-				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
-					resetDriveEncoders();
-					setDrivePower(0.0f, 0.0f);
-					nextStep();
-				}
-				break;
-			case 15:
-				// wait
-				if (haveDriveEncodersReset()) {
-					runUsingEncoders();
-					setDrivePower(-1.0f, -1.0f);
-					nextStep();
-				}
-				break;
-			case 16:
-				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
-					resetDriveEncoders();
-					setDrivePower(0.0f, 0.0f);
-					nextStep();
-				}
-				break;
-			case 17:
-				if (haveDriveEncodersReset()) {
-					runUsingEncoders();
-					setDrivePower(-0.5f, 0.5f);
-					nextStep();
-				}
-				break;
-			case 18:
-				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
-					resetDriveEncoders();
-					setDrivePower(0.0f, 0.0f);
-					nextStep();
-				}
-				break;
-			case 19:
-				if (haveDriveEncodersReset()) {
-					runUsingEncoders();
-					setDrivePower(1.0f, 1.0f);
-					nextStep();
-				}
-				break;
-			case 20:
-				if (haveDriveEncodersReached(2880, 2880)) { //todo change values
-					resetDriveEncoders();
-					setDrivePower(0.0f, 0.0f);
-					nextStep();
-				}
-				break;
-			case 21:
-				if (haveDriveEncodersReset()) {
+				if (haveDriveEncodersReached(7000, 7000)){
+					stopAndReset();
 					nextStep();
 				}
 				break;
@@ -224,6 +108,16 @@ public class FredAuto extends FredHardware {
 	// return the current time minus the start time
 	private long timeSince(long timeSinceValue) {
 		return System.currentTimeMillis() - timeSinceValue;
+	}
+
+	private void stopAndReset(){
+		setDrivePower(0.0f, 0.0f);
+		resetDriveEncoders();
+		gyroCalibrate();
+	}
+
+	private boolean resetCompleted(){
+		return haveDriveEncodersReset() && !gyroSensor.isCalibrating();
 	}
 
 	// constant used for end of program
