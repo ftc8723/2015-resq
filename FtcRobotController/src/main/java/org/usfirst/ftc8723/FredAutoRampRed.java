@@ -84,7 +84,7 @@ public class FredAutoRampRed extends FredHardware {
 			default:
 				// final state - autonomous actions have been accomplished
 				step = STOP;
-				if (runtime == 0) runtime = timeSince(start);
+				if (runtime == 0) runtime = timeSince(startTime);
 				break;
 		}
 	}
@@ -101,13 +101,8 @@ public class FredAutoRampRed extends FredHardware {
 			telemetry.addData("Autonomous Complete ", String.format("%.2f sec", ((double)runtime)/1000));
 		} else {
 			telemetry.addData("Autonomous Step ", step);
-			telemetry.addData("Autonomous Time ", String.format("%.2f", ((double) timeSince(start))/1000));
+			telemetry.addData("Autonomous Time ", String.format("%.2f", ((double) timeSince(startTime))/1000));
 		}
-	}
-
-	// return the current time minus the start time
-	private long timeSince(long timeSinceValue) {
-		return System.currentTimeMillis() - timeSinceValue;
 	}
 
 	// constant used for end of program

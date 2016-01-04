@@ -20,10 +20,10 @@ public class FredTeleOp extends FredHardware {
 		super.init();
 
 		// assign the starting position of the wrist and bucketServo
-		setElbowPosition(0.5);
-		setBucketPosition(1.0);
-		setShieldPositionR(0.8);
+		setElbowPosition(0.1);
+		setBucketPosition(0.5);
 		setShieldPositionL(0.6);
+		setShieldPositionR(0.6);
 	}
 
 	public void start() {
@@ -91,7 +91,7 @@ public class FredTeleOp extends FredHardware {
 			adjustArmPosition(-ARM_DELTA);
 		}
 		else {
-			adjustArmPosition(0);
+			//adjustArmPosition(0);
 		}
 		if (gamepad1.left_bumper && gamepad1.right_bumper){
 			stopAndReset();
@@ -134,7 +134,6 @@ public class FredTeleOp extends FredHardware {
 	final static double ELBOW_DELTA = 0.002;
 	final static double BUCKET_DELTA = 0.002;
 	final static double SHIELD_DELTA = 0.002;
-	final static int ARM_DELTA = 4;
-	private int shieldDirection = -1;
+	final static int ARM_DELTA = 2;
 
 }

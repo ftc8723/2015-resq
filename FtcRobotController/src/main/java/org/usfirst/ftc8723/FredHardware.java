@@ -1,6 +1,5 @@
 package org.usfirst.ftc8723;
 
-import com.qualcomm.hardware.ModernRoboticsUsbLegacyModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -31,8 +30,10 @@ public abstract class FredHardware extends OpMode {
     private double rPower;
     private int armPosition;
 
-    // timer
-    long start;
+    // timers and counters for debugging
+    long startTime;
+    long loopTimer;
+    long loopCount;
 
     // hardware
     DcMotor motorLeft;
@@ -63,8 +64,6 @@ public abstract class FredHardware extends OpMode {
 		 * Note that the names of the devices must match the names used when you
 		 * configured your robot and created the configuration file.
 		 */
-
-        resetDriveEncoders();
 
         try {
             motorLeft = hardwareMap.dcMotor.get("motorLeft");
@@ -206,15 +205,9 @@ public abstract class FredHardware extends OpMode {
      */
     @Override
     public void start() {
-        start = System.currentTimeMillis();
-        long elapsed = 0;
-        while (gyroSensor.isCalibrating() && gyroHeading() != 0 && elapsed < 200) {
-            // wait up to 3 seconds to calibrate ... should NEVER take this long
-            elapsed = System.currentTimeMillis() - start;
-            if (elapsed > 3000) {
-                hardwareErrors.put("gyroSensor", "calibration timeout after " + elapsed + "ms");
-            }
-        }
+        startTime = System.currentTimeMillis();
+        loopTimer = System.currentTimeMillis();
+        stopAndReset();
     }
 
 
@@ -230,12 +223,31 @@ public abstract class FredHardware extends OpMode {
      */
     @Override
     public void loop() {
+
         try {
+            // don't do anything while resetting... other than check to see if we're still resetting
+            if (resetting) {
+                if (resetCompleted()) {
+                    // set the motors back to standard mode
+                    runUsingEncoders();
+                    resetting = false;
+                }
+                else return;
+            }
+
+            // check if the arm is in the target position & cut power
+            checkArmPosition();
+
             // perform the normal loop functions inside a try/catch to improve error handling
             innerLoop();
 
-            // log the standard telemetry variables
+            // update standard telemetry
             updateTelemetry();
+
+            // update loop debug telemetry
+            updateTelemetry("Loop Timer", String.format("%d ms", timeSince(loopTimer)));
+            updateTelemetry("Loops/Sec ", String.format("%d", (loopCount++ / startTime)/1000));
+            loopTimer = System.currentTimeMillis();
 
         } catch (RuntimeException e) {
             String message = e.getMessage();
@@ -260,7 +272,6 @@ public abstract class FredHardware extends OpMode {
      * their own telemetry
      */
     protected void updateTelemetry() {
-        updateTelemetry("hardwareErrors", hardwareErrors.toString());
         updateTelemetry("colorSensor", String.format("rgb: %d,%d,%d", colorSensor.red(), colorSensor.green(), +colorSensor.blue()));
         updateTelemetry("lightSensor", String.format("%.2f", lightSensor.getLightDetected()));
         updateTelemetry("ultraSensor", String.format("%.2f", getUltrasonicLevel()));
@@ -287,24 +298,6 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
-     * Reset both drive wheel encoders.
-     */
-    public void resetDriveEncoders() {
-        // perform the action on both motors.
-        if (motorLeft != null) {
-            motorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
-        }
-
-        if (motorRight != null) {
-            motorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
-        }
-
-        if (armMotor != null) {
-            armMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);
-        }
-    }
-
-    /**
      * Set both drive wheel encoders to run
      */
     public void runUsingEncoders() {
@@ -318,7 +311,6 @@ public abstract class FredHardware extends OpMode {
         }
         if (armMotor != null) {
             armMotor.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-            armMotor.setPower(0.075);
         }
     }
 
@@ -399,13 +391,6 @@ public abstract class FredHardware extends OpMode {
     }
 
     /**
-     * @return the number of milliseconds since the start() method was called
-     */
-    long timeSinceStart() {
-        return System.currentTimeMillis() - start;
-    }
-
-    /**
      * Indicate whether the drive motors' encoders have reached a value.
      */
     boolean haveDriveEncodersReached(double leftCount, double rightCount) {
@@ -422,13 +407,38 @@ public abstract class FredHardware extends OpMode {
         return (getEncoder(motorLeft) == 0) && (getEncoder(motorRight) == 0);
     }
 
-    void stopAndReset(){
+    /**
+     * Stops the motors and resets all the encoders & gyro
+     */
+    void stopAndReset() {
+        // stop the wheels
         setDrivePower(0.0f, 0.0f);
-        resetDriveEncoders();
+
+        // reset the arm
+        setArmMotorPosition(0);
+
+        // reset both drive wheel encoders.
+        if (motorLeft != null) {
+            motorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        }
+        if (motorRight != null) {
+            motorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        }
+        if (armMotor != null) {
+            armMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        }
+
+        // recalibrate
         gyroCalibrate();
+
+        // set a variable so we know to check
+        resetting = true;
     }
 
-    boolean resetCompleted(){
+    /**
+     * @return true if the drive encoders are at zero and the gyro is done calibrating
+     */
+    boolean resetCompleted() {
         return haveDriveEncodersReset() && !gyroSensor.isCalibrating();
     }
 
@@ -473,6 +483,7 @@ public abstract class FredHardware extends OpMode {
         armPosition = clip(pos, ARM_MIN, ARM_MAX);
         try {
             armMotor.setTargetPosition(pos);
+            armMotor.setPower(0.05);
         } catch (Exception e) {
             hardwareErrors.put("armMotor", e.getMessage());
         }
@@ -485,6 +496,16 @@ public abstract class FredHardware extends OpMode {
      */
     public void adjustArmPosition(int delta) {
         setArmMotorPosition(armPosition + delta);
+    }
+
+    /**
+     * checks the arm position and if it has met the target location, cuts power
+     */
+    public void checkArmPosition() {
+        int currentPosition = armMotor.getCurrentPosition();
+        if (currentPosition == armPosition || currentPosition < 0) {
+            armMotor.setPower(0.0);
+        }
     }
 
     /**
@@ -559,16 +580,23 @@ public abstract class FredHardware extends OpMode {
         setShieldPositionR(shieldPositionR + delta);
     }
 
-    final static double ELBOW_MIN = 0.01;
-    final static double ELBOW_MAX = 1.0;
-    final static double BUCKET_MIN = 0.20;
-    final static double BUCKET_MAX = 0.99;
-    final static double SHIELDS_L_MIN = 0.6;
-    final static double SHIELDS_L_MAX = 1.0;
-    final static double SHIELDS_R_MIN = 0.0;
+    // return the current time minus the start time
+    long timeSince(long timeSinceValue) {
+        return System.currentTimeMillis() - timeSinceValue;
+    }
+
+    final static double ELBOW_MIN = 0.0;
+    final static double ELBOW_MAX = 0.7;
+    final static double BUCKET_MIN = 0.10;
+    final static double BUCKET_MAX = 0.85;
+    final static double SHIELDS_L_MIN = 0.07;
+    final static double SHIELDS_L_MAX = 0.60;
+    final static double SHIELDS_R_MIN = 0.07;
     final static double SHIELDS_R_MAX = 1.0;
-    final static int ARM_MIN = 10;
-    final static int ARM_MAX = 750;
+    final static int ARM_MIN = 0;
+    final static int ARM_MAX = 850;
     final static int ULTRASONIC_PORT = 4;
 
+    // private - for use when resetting the controllers and gyros
+    private boolean resetting;
 }
