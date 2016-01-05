@@ -411,20 +411,18 @@ public abstract class FredHardware extends OpMode {
      * Stops the motors and resets all the encoders & gyro
      */
     void stopAndReset() {
-        // stop the wheels
-        setDrivePower(0.0f, 0.0f);
 
-        // reset the arm
-        setArmMotorPosition(0);
-
-        // reset both drive wheel encoders.
+        // stop the motors and reset both drive wheel encoders.
         if (motorLeft != null) {
+            motorLeft.setPower(0);
             motorLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
         if (motorRight != null) {
+            motorRight.setPower(0);
             motorRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
         if (armMotor != null) {
+            armMotor.setPower(0);
             armMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
 

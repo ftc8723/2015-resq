@@ -26,11 +26,6 @@ public class FredTeleOp extends FredHardware {
 		setShieldPositionR(0.6);
 	}
 
-	public void start() {
-		super.start();
-		runUsingEncoders();
-	}
-
 	/*
 	 * This method will be called repeatedly in a loop
 	 *
