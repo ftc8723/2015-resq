@@ -584,7 +584,7 @@ public abstract class FredHardware extends OpMode {
     }
 
     final static double ELBOW_MIN = 0.0;
-    final static double ELBOW_MAX = 0.7;
+    final static double ELBOW_MAX = 1.0;
     final static double BUCKET_MIN = 0.10;
     final static double BUCKET_MAX = 0.85;
     final static double SHIELDS_L_MIN = 0.07;
